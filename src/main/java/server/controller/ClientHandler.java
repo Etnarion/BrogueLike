@@ -103,7 +103,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setDirection(Direction.DOWN);
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
-                    attackMessage.setRange(3);
+                    attackMessage.setRange(hero.getRange());
                     hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
@@ -114,7 +114,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setDirection(Direction.LEFT);
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
-                    attackMessage.setRange(3);
+                    attackMessage.setRange(hero.getRange());
                     hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
@@ -124,8 +124,8 @@ public class ClientHandler implements IClientHandler {
                     attackMessage = new AttackCommandResponse();
                     attackMessage.setDirection(Direction.RIGHT);
                     attackMessage.setId(hero.getId());
-                    attackMessage.setDamage(hero.getStrength());
-                    attackMessage.setRange(3);
+                    attackMessage.setDamage(hero.getDamage());
+                    attackMessage.setRange(hero.getRange());
                     hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
@@ -136,7 +136,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setDirection(Direction.UP);
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
-                    attackMessage.setRange(3);
+                    attackMessage.setRange(hero.getRange());
                     hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);

@@ -12,6 +12,7 @@ public abstract class Entity implements Unwalkable {
     private int maxHealth;
     private int health;
     private int strength;
+    protected int baseRange;
     protected Point position;
     private Tile tile;
 
@@ -22,6 +23,7 @@ public abstract class Entity implements Unwalkable {
         maxHealth = 20;
         health = 20;
         strength = 1;
+        baseRange = 1;
     }
 
     public int getId() {

@@ -10,4 +10,16 @@ public abstract class Weapon {
         this.range = range;
         this.area = area;
     }
+
+    public int getRange() {
+        return range;
+    }
+
+    public int getDamage() {
+        return damage;
+    }
+
+    public int getArea() {
+        return area;
+    }
 }
