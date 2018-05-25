@@ -82,22 +82,32 @@ public class DungeonView implements TerminalResizeListener {
         displayEntity(entity);
     }
 
-    public void attack(Entity entity, Direction direction, int range) throws IOException, InterruptedException {
-        for (int i = 1; i <= range; i++) {
-            Point curPos = new Point(entity.position().x + i*direction.x(), entity.position().y +i*direction.y());
-            if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
-                Tile tile = tmpMap[curPos.y][curPos.x];
-                terminal.setCursorPosition(curPos.x * 2, curPos.y);
-                terminal.setBackgroundColor(new TextColor.RGB(255, 0, 0));
-                terminal.putCharacter(tile.symbol);
-                terminal.flush();
-                Thread.sleep(100);
-                terminal.setCursorPosition(curPos.x * 2, curPos.y);
-                terminal.setBackgroundColor(new TextColor.RGB(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue()));
-                terminal.putCharacter(tile.symbol);
-                terminal.flush();
+    public void attack(Entity entity, Direction direction, int range) {
+        new Thread(() -> {
+            try {
+                Point position = entity.position();
+                for (int i = 1; i <= range; i++) {
+                    Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
+                    if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
+                        Tile tile = tmpMap[curPos.y][curPos.x];
+                        terminal.setCursorPosition(curPos.x * 2, curPos.y);
+                        terminal.setBackgroundColor(new TextColor.RGB(229, 99, 0));
+                        terminal.putCharacter(tile.symbol);
+                        terminal.flush();
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ie) {
+                        }
+                        terminal.setCursorPosition(curPos.x * 2, curPos.y);
+                        terminal.setBackgroundColor(new TextColor.RGB(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue()));
+                        terminal.putCharacter(tile.symbol);
+                        terminal.flush();
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
             }
-        }
+        }).start();
     }
 
     public KeyStroke getInput() throws IOException {
