@@ -154,7 +154,7 @@ public class ClientHandler implements IClientHandler {
             Point position = new Point(hero.position().x +i*attackMessage.getDirection().x(), hero.position().y + attackMessage.getDirection().y() +i*attackMessage.getDirection().y());
             if (position.x < Dungeon.DUNGEON_SIZE && position.x >= 0 && position.y < Dungeon.DUNGEON_SIZE && position.y >= 0) {
                 Entity entityToHurt = Dungeon.getDungeon().getEntity(position);
-                if (entityToHurt != null) {
+                if (entityToHurt != null && entityToHurt.getId() != hero.getId()) {
                     entityToHurt.hurt(attackMessage.getDamage());
                     hurtEntities.add(entityToHurt.getId());
                 }
