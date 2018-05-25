@@ -150,7 +150,7 @@ public class ClientHandler implements IClientHandler {
 
     private ArrayList<Integer> hurtEntities(AttackCommandResponse attackMessage) {
         ArrayList hurtEntities = new ArrayList<>();
-        for (int i = 0; i < attackMessage.getRange(); i++) {
+        for (int i = 1; i <= attackMessage.getRange(); i++) {
             Point position = new Point(hero.position().x +i*attackMessage.getDirection().x(), hero.position().y + attackMessage.getDirection().y() +i*attackMessage.getDirection().y());
             if (position.x < Dungeon.DUNGEON_SIZE && position.x >= 0 && position.y < Dungeon.DUNGEON_SIZE && position.y >= 0) {
                 Entity entityToHurt = Dungeon.getDungeon().getEntity(position);
