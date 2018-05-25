@@ -55,4 +55,8 @@ public class AttackCommandResponse {
         this.hurtEntities.clear();
         this.hurtEntities.addAll(hurtEntities);
     }
+
+    public void addAll(List<Integer> fromList) {
+        setHurtEntities(fromList);
+    }
 }
