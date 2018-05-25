@@ -104,8 +104,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
                     attackMessage.setRange(3);
-                    hurtEntities = new ArrayList<>();
-                    hurtEntities(attackMessage, hurtEntities);
+                    hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
                     GameServer.getServer().notifyClients(JsonObjectMapper.toJson(attackMessage));
@@ -116,8 +115,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
                     attackMessage.setRange(3);
-                    hurtEntities = new ArrayList<>();
-                    hurtEntities(attackMessage, hurtEntities);
+                    hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
                     GameServer.getServer().notifyClients(JsonObjectMapper.toJson(attackMessage));
@@ -128,8 +126,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
                     attackMessage.setRange(3);
-                    hurtEntities = new ArrayList<>();
-                    hurtEntities(attackMessage, hurtEntities);
+                    hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
                     GameServer.getServer().notifyClients(JsonObjectMapper.toJson(attackMessage));
@@ -140,8 +137,7 @@ public class ClientHandler implements IClientHandler {
                     attackMessage.setId(hero.getId());
                     attackMessage.setDamage(hero.getStrength());
                     attackMessage.setRange(3);
-                    hurtEntities = new ArrayList<>();
-                    hurtEntities(attackMessage, hurtEntities);
+                    hurtEntities = hurtEntities(attackMessage);
                     attackMessage.setHurtEntities(hurtEntities);
                     GameServer.getServer().notifyClients(AttackProtocol.ATTACK_RESPONSE);
                     GameServer.getServer().notifyClients(JsonObjectMapper.toJson(attackMessage));
@@ -152,9 +148,10 @@ public class ClientHandler implements IClientHandler {
         }
     }
 
-    private void hurtEntities(AttackCommandResponse attackMessage, ArrayList<Integer> hurtEntities) {
+    private ArrayList<Integer> hurtEntities(AttackCommandResponse attackMessage) {
+        ArrayList hurtEntities = new ArrayList<>();
         for (int i = 0; i < attackMessage.getRange(); i++) {
-            Point position = new Point(hero.position().x + attackMessage.getDirection().x()+i*attackMessage.getDirection().x(), hero.position().y + attackMessage.getDirection().y() + attackMessage.getDirection().y()+i*attackMessage.getDirection().y());
+            Point position = new Point(hero.position().x +i*attackMessage.getDirection().x(), hero.position().y + attackMessage.getDirection().y() +i*attackMessage.getDirection().y());
             if (position.x < Dungeon.DUNGEON_SIZE && position.x >= 0 && position.y < Dungeon.DUNGEON_SIZE && position.y >= 0) {
                 Entity entityToHurt = Dungeon.getDungeon().getEntity(position);
                 if (entityToHurt != null) {
@@ -163,5 +160,6 @@ public class ClientHandler implements IClientHandler {
                 }
             }
         }
+        return hurtEntities;
     }
 }

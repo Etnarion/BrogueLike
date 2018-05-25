@@ -52,7 +52,7 @@ public class AttackCommandResponse {
     }
 
     public void setHurtEntities(List<Integer> hurtEntities) {
-        hurtEntities.clear();
+        this.hurtEntities.clear();
         this.hurtEntities.addAll(hurtEntities);
     }
 }
