@@ -76,7 +76,7 @@ public class DungeonView implements TerminalResizeListener {
 
     }
 
-    public void move(Entity entity, Point previousPos) throws IOException {
+    public synchronized void move(Entity entity, Point previousPos) throws IOException {
         terminal.setCursorPosition(previousPos.x * 2, previousPos.y);
         displayTile(new Point(previousPos.x, previousPos.y));
         displayEntity(entity);
