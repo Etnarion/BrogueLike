@@ -3,6 +3,7 @@ package model;
 import client.view.DungeonView;
 import model.entities.Entity;
 import model.entities.Hero;
+import model.entities.Spider;
 import model.tiles.*;
 import utils.Direction;
 
@@ -41,6 +42,7 @@ public class Dungeon {
     public synchronized void initHero(int id) throws IOException {
         hero = new Hero(new Point(4+id, 4), id);
         placeEntity(hero);
+        initEnemies();
         DungeonView.getDungeonView().displayEntity(hero);
     }
 
@@ -80,6 +82,11 @@ public class Dungeon {
 
     }
 
+    private void initEnemies() {
+        Spider spider = new Spider(new Point(20, 20), 5);
+        placeEntity(spider);
+    }
+
     public Tile getTile(Point position) {
         return tiles[position.y][position.x];
     }
@@ -97,6 +104,10 @@ public class Dungeon {
             }
         }
         return null;
+    }
+
+    public Hero getHero() {
+        return hero;
     }
 
     public boolean moveEntity(Entity entity, Point newPos) {

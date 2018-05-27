@@ -90,10 +90,14 @@ public class DungeonView implements TerminalResizeListener {
                     Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
                     if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
                         Tile tile = tmpMap[curPos.y][curPos.x];
+                        Entity curEntity = Dungeon.getDungeon().getEntity(new Point(curPos.x, curPos.y));
                         synchronized (this) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
                             terminal.setBackgroundColor(new TextColor.RGB(229, 99, 0));
-                            terminal.putCharacter(tile.symbol);
+                            if (curEntity == null)
+                                terminal.putCharacter(tile.symbol);
+                            else
+                                terminal.putCharacter(curEntity.symbol);
                         }
                         terminal.flush();
                         try {
@@ -103,7 +107,10 @@ public class DungeonView implements TerminalResizeListener {
                         synchronized (this) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
                             terminal.setBackgroundColor(new TextColor.RGB(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue()));
-                            terminal.putCharacter(tile.symbol);
+                            if (curEntity == null)
+                                terminal.putCharacter(tile.symbol);
+                            else
+                                terminal.putCharacter(curEntity.symbol);
                         }
                         terminal.flush();
                     }
@@ -120,6 +127,10 @@ public class DungeonView implements TerminalResizeListener {
             key = terminal.readInput();
         }
         return key;
+    }
+
+    public void close() throws IOException {
+        terminal.close();
     }
 
     static public DungeonView getDungeonView() {

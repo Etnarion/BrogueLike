@@ -1,7 +1,8 @@
 package model.entities;
 
-import weapons.Gun;
-import weapons.Weapon;
+import model.weapons.Gun;
+import model.weapons.Weapon;
+import utils.ExtendedAscii;
 
 import java.awt.*;
 
@@ -16,6 +17,7 @@ public class Hero extends Entity {
         symbol = 'X';
         gold = 0;
         weapon = new Gun(10, 7, 1);
+        walkable = false;
     }
 
     public int getRange() {
@@ -35,5 +37,11 @@ public class Hero extends Entity {
 
     public void setGold(int gold) {
         this.gold = gold;
+    }
+
+    @Override
+    public void die() {
+        super.die();
+        symbol = ExtendedAscii.getAscii(157);
     }
 }

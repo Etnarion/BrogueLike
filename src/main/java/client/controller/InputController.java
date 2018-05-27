@@ -1,5 +1,7 @@
 package client.controller;
 
+import model.Dungeon;
+import model.entities.Hero;
 import utils.Direction;
 import client.view.DungeonView;
 import com.googlecode.lanterna.input.KeyStroke;
@@ -20,7 +22,8 @@ public class InputController implements Runnable {
     }
 
     public void input() throws IOException {
-        while (true) {
+        Hero hero = Dungeon.getDungeon().getHero();
+        while (hero.isAlive()) {
             KeyStroke key = DungeonView.getDungeonView().getInput();
             switch (key.getKeyType()) {
                 case ArrowDown:

@@ -6,5 +6,6 @@ public class AttackProtocol {
     public final static String ATTACK_UP = "ATTACK_UP";
     public final static String ATTACK_DOWN = "ATTACK_DOWN";
 
-    public final static String ATTACK_RESPONSE = "ATTACK_RESPONSE";
+    public final static String BEGIN_ATTACK = "BEGIN_ATTACK";
+    public final static String HURT_RESPONSE = "HURT_RESPONSE";
 }

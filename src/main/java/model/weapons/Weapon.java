@@ -1,4 +1,4 @@
-package weapons;
+package model.weapons;
 
 public abstract class Weapon {
     protected int damage;

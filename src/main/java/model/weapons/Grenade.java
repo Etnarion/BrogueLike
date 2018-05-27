@@ -1,4 +1,4 @@
-package weapons;
+package model.weapons;
 
 public class Grenade extends Weapon {
     public Grenade(int damage, int range, int area) {

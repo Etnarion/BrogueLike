@@ -1,5 +1,6 @@
 package client.controller;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import model.Dungeon;
 import model.entities.Entity;
 import model.entities.Hero;
@@ -24,25 +25,46 @@ public class ClientController implements Runnable {
         DungeonView.getDungeonView();
     }
 
-    private void listen() throws IOException, InterruptedException {
+    private void listen() throws IOException {
         String line;
         while (true) {
             line = in.readLine();
             switch (line) {
-                case AttackProtocol.ATTACK_RESPONSE :
+                case AttackProtocol.BEGIN_ATTACK :
                     synchronized (this) {
-                        AttackCommandResponse response = JsonObjectMapper.parseJson(in.readLine(), AttackCommandResponse.class);
+                        AttackCommandResponse response;
+                        try {
+                            response = JsonObjectMapper.parseJson(in.readLine(), AttackCommandResponse.class);
+                        } catch (JsonParseException e) {
+                            break;
+                        }
+
                         Dungeon dungeon = Dungeon.getDungeon();
                         Entity entity = dungeon.getEntity(response.getId());
-                        for (Integer id : response.getHurtEntities()) {
-                            Dungeon.getDungeon().getEntity(id).hurt(response.getDamage());
-                        }
                         DungeonView.getDungeonView().attack(entity, response.getDirection(), response.getRange());
+                    }
+                    break;
+
+                case AttackProtocol.HURT_RESPONSE :
+                    synchronized (this) {
+                        HurtCommandResponse hurtResponse;
+                        try {
+                            hurtResponse = JsonObjectMapper.parseJson(in.readLine(), HurtCommandResponse.class);
+                        } catch (JsonParseException e) {
+                            break;
+                        }
+                        if (hurtResponse.getEntityId() != -1)
+                            Dungeon.getDungeon().getEntity(hurtResponse.getEntityId()).hurt(hurtResponse.getDamage());
                     }
                     break;
                 case MoveProtocol.MOVE_RESPONSE :
                     synchronized (this) {
-                        MoveCommandResponse response = JsonObjectMapper.parseJson(in.readLine(), MoveCommandResponse.class);
+                        MoveCommandResponse response;
+                        try {
+                            response = JsonObjectMapper.parseJson(in.readLine(), MoveCommandResponse.class);
+                        } catch (JsonParseException e) {
+                            break;
+                        }
                         Dungeon dungeon = Dungeon.getDungeon();
                         Entity entity = dungeon.getEntity(response.getId());
                         Point prevPos = entity.position();
@@ -65,6 +87,10 @@ public class ClientController implements Runnable {
                     }
                     Dungeon.getDungeon().placeEntity(newEntity);
                     DungeonView.getDungeonView().displayEntity(newEntity);
+                    break;
+                default:
+                    break;
+
             }
         }
     }
@@ -73,8 +99,6 @@ public class ClientController implements Runnable {
         try {
             listen();
         } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

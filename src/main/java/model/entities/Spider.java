@@ -7,4 +7,10 @@ public class Spider extends Enemy {
         super(position, id);
         symbol = 'S';
     }
+
+    @Override
+    public void die() {
+        super.die();
+        symbol = '$';
+    }
 }
