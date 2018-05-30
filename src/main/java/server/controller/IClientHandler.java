@@ -1,5 +1,7 @@
 package server.controller;
 
+import model.elements.entities.Hero;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -26,4 +28,5 @@ public interface IClientHandler {
      */
     public void handleClientConnection(InputStream is, OutputStream os) throws IOException;
 
+    public Hero getHero();
 }

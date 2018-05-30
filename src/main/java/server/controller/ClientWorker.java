@@ -32,6 +32,10 @@ public class ClientWorker implements Runnable {
         }
     }
 
+    public IClientHandler getHandler() {
+        return handler;
+    }
+
     public OutputStream getOs() {
         return os;
     }

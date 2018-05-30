@@ -1,8 +1,7 @@
 package model;
 
 
-import model.tiles.Tile;
-import model.tiles.Unwalkable;
+import model.elements.tiles.Tile;
 
 import java.util.LinkedList;
 
@@ -37,17 +36,17 @@ public class DungeonGraph {
     private void arrayToAdjacencyList(Tile[][] map) {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                if (!(map[i][j] instanceof Unwalkable)) {
-                    if (!(map[i-1][j] instanceof Unwalkable)) {
+                if (!(map[i][j].isWalkable())) {
+                    if (!(map[i-1][j].isWalkable())) {
                         addEdge(i*map.length+j, (i-1)*map.length+j);
                     }
-                    if (!(map[i+1][j] instanceof Unwalkable)) {
+                    if (!(map[i+1][j].isWalkable())) {
                         addEdge(i*map.length+j, (i+1)*map.length+j);
                     }
-                    if (!(map[i][j-1] instanceof Unwalkable)) {
+                    if (!(map[i][j-1].isWalkable())) {
                         addEdge(i*map.length+j, i*map.length+j-1);
                     }
-                    if (!(map[i][j+1] instanceof Unwalkable)) {
+                    if (!(map[i][j+1].isWalkable())) {
                         addEdge(i*map.length+j, i*map.length+j+1);
                     }
                 }

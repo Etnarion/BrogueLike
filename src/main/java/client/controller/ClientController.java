@@ -1,10 +1,12 @@
 package client.controller;
 
+import client.view.HeroView;
 import com.fasterxml.jackson.core.JsonParseException;
 import model.Dungeon;
-import model.entities.Entity;
-import model.entities.Hero;
-import model.entities.Spider;
+import model.elements.entities.Entity;
+import model.elements.entities.Hero;
+import model.elements.mechanisms.Button;
+import model.elements.mechanisms.Mechanism;
 import utils.JsonObjectMapper;
 import client.view.DungeonView;
 import protocol.*;
@@ -18,11 +20,12 @@ public class ClientController implements Runnable {
     BufferedReader in;
     PrintWriter out;
 
-    public ClientController(BufferedReader in, PrintWriter out) {
+    public ClientController(BufferedReader in, PrintWriter out) throws IOException {
         this.in = in;
         this.out = out;
         Dungeon.getDungeon();
         DungeonView.getDungeonView();
+        HeroView.getHeroView().showHealth();
     }
 
     private void listen() throws IOException {
@@ -36,6 +39,7 @@ public class ClientController implements Runnable {
                         try {
                             response = JsonObjectMapper.parseJson(in.readLine(), AttackCommandResponse.class);
                         } catch (JsonParseException e) {
+                            System.out.println(e.getMessage());
                             break;
                         }
 
@@ -51,10 +55,15 @@ public class ClientController implements Runnable {
                         try {
                             hurtResponse = JsonObjectMapper.parseJson(in.readLine(), HurtCommandResponse.class);
                         } catch (JsonParseException e) {
+                            System.out.println(e.getMessage());
                             break;
                         }
-                        if (hurtResponse.getEntityId() != -1)
+                        if (hurtResponse.getEntityId() != -1) {
                             Dungeon.getDungeon().getEntity(hurtResponse.getEntityId()).hurt(hurtResponse.getDamage());
+                            if (hurtResponse.getEntityId() == Dungeon.getDungeon().getHero().getId()) {
+                                HeroView.getHeroView().showHealth();
+                            }
+                        }
                     }
                     break;
                 case MoveProtocol.MOVE_RESPONSE :
@@ -63,6 +72,7 @@ public class ClientController implements Runnable {
                         try {
                             response = JsonObjectMapper.parseJson(in.readLine(), MoveCommandResponse.class);
                         } catch (JsonParseException e) {
+                            System.out.println(e.getMessage());
                             break;
                         }
                         Dungeon dungeon = Dungeon.getDungeon();
@@ -72,21 +82,20 @@ public class ClientController implements Runnable {
                         DungeonView.getDungeonView().move(entity, prevPos);
                     }
                     break;
-                case EntityProtocol.INIT_ENTITY :
-                    InitEntityResponse initResponse = JsonObjectMapper.parseJson(in.readLine(), InitEntityResponse.class);
-                    Entity newEntity = null;
-                    switch (initResponse.getEntity()) {
-                        case HERO:
-                            newEntity = new Hero(initResponse.getPosition(), initResponse.getId());
-                            break;
-                        case SPIDER:
-                            newEntity = new Spider(initResponse.getPosition(), initResponse.getId());
-                            break;
-                        default:
-                            break;
+                case HeroProtocol.INIT_HERO :
+                    InitHeroResponse initResponse = JsonObjectMapper.parseJson(in.readLine(), InitHeroResponse.class);
+                    Hero hero = new Hero(initResponse.getPosition(), initResponse.getId());
+                    Dungeon.getDungeon().placeEntity(hero);
+                    DungeonView.getDungeonView().displayEntity(hero);
+                    break;
+                case GameProtocol.BUTTON :
+                    Button button = (Button)Dungeon.getDungeon().getMechanism(Integer.valueOf(in.readLine()));
+                    if (button != null) {
+                        button.activate();
+                        for (Mechanism mechanism : button.getLinkedMechanisms()) {
+                            DungeonView.getDungeonView().displayElement(new Point(mechanism.position().y, mechanism.position().x));
+                        }
                     }
-                    Dungeon.getDungeon().placeEntity(newEntity);
-                    DungeonView.getDungeonView().displayEntity(newEntity);
                     break;
                 default:
                     break;

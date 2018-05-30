@@ -1,7 +1,7 @@
 package client.controller;
 
 import model.Dungeon;
-import model.entities.Hero;
+import model.elements.entities.Hero;
 import utils.Direction;
 import client.view.DungeonView;
 import com.googlecode.lanterna.input.KeyStroke;

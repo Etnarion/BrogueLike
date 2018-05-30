@@ -1,13 +1,15 @@
 package server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import model.elements.Element;
+import model.elements.mechanisms.Button;
+import model.elements.mechanisms.Mechanism;
 import protocol.*;
-import model.entities.Entities;
-import model.entities.Entity;
-import model.entities.Spider;
+import model.elements.entities.Entities;
+import model.elements.entities.Entity;
 import utils.JsonObjectMapper;
 import model.Dungeon;
-import model.entities.Hero;
+import model.elements.entities.Hero;
 import utils.Direction;
 
 import java.awt.*;
@@ -34,28 +36,20 @@ public class ClientHandler implements IClientHandler {
                     Dungeon.getDungeon().initHero(hero);
                     writer.println(hero.getId());
                     writer.flush();
-                    for (Entity entities[] : Dungeon.getDungeon().getEntities()) {
-                        for (Entity ent : entities) {
-                            if (ent != null) {
-                                InitEntityResponse initResponse = new InitEntityResponse();
-                                initResponse.setId(ent.getId());
-                                initResponse.setPosition(ent.position());
-                                if (ent instanceof Spider)
-                                    initResponse.setEntity(Entities.SPIDER);
-                                else if (ent instanceof Hero)
-                                    initResponse.setEntity(Entities.HERO);
-                                writer.println(EntityProtocol.INIT_ENTITY);
-                                writer.println(JsonObjectMapper.toJson(initResponse));
-                                writer.flush();
-                            }
+                    ArrayList<Hero> heroes = GameServer.getServer().getHeroes();
+                    for (Hero hero : heroes) {
+                        if (hero != this.hero) {
+                            InitHeroResponse heroResponse = new InitHeroResponse();
+                            heroResponse.setId(hero.getId());
+                            heroResponse.setPosition(hero.position());
+                            writer.println(HeroProtocol.INIT_HERO + '\n' + JsonObjectMapper.toJson(heroResponse));
+                            writer.flush();
                         }
                     }
-                    InitEntityResponse initResponse = new InitEntityResponse();
+                    InitHeroResponse initResponse = new InitHeroResponse();
                     initResponse.setId(hero.getId());
                     initResponse.setPosition(hero.position());
-                    initResponse.setEntity(Entities.HERO);
-                    GameServer.getServer().notifyClients(EntityProtocol.INIT_ENTITY);
-                    GameServer.getServer().notifyClients(JsonObjectMapper.toJson(initResponse));
+                    GameServer.getServer().notifyClients(this, HeroProtocol.INIT_HERO + "\n" + JsonObjectMapper.toJson(initResponse));
                     break;
                 case MoveProtocol.LEFT :
                     move(Direction.LEFT);
@@ -96,8 +90,7 @@ public class ClientHandler implements IClientHandler {
         attackMessage.setId(hero.getId());
         attackMessage.setDirection(direction);
         attackMessage.setRange(hero.getRange());
-        GameServer.getServer().notifyClients(AttackProtocol.BEGIN_ATTACK);
-        GameServer.getServer().notifyClients(JsonObjectMapper.toJson(attackMessage));
+        GameServer.getServer().notifyClients(AttackProtocol.BEGIN_ATTACK + "\n" + JsonObjectMapper.toJson(attackMessage));
     }
 
     private void hurt(Direction direction) {
@@ -109,14 +102,16 @@ public class ClientHandler implements IClientHandler {
 
     private void move(Direction direction) throws JsonProcessingException {
         MoveCommandResponse moveMessage;
+        Element nextElement = Dungeon.getDungeon().getElement(new Point(hero.position().x + direction.x(), hero.position().y + direction.y()));
+        if (nextElement instanceof Button) {
+            ((Button) nextElement).activate();
+            GameServer.getServer().notifyClients(GameProtocol.BUTTON + '\n' + ((Button) nextElement).getId());
+        }
         if (Dungeon.getDungeon().moveEntity(hero, direction)) {
             moveMessage = new MoveCommandResponse();
             moveMessage.setId(hero.getId());
             moveMessage.setDirection(direction);
-            synchronized (this) {
-                GameServer.getServer().notifyClients(MoveProtocol.MOVE_RESPONSE);
-                GameServer.getServer().notifyClients(JsonObjectMapper.toJson(moveMessage));
-            }
+            GameServer.getServer().notifyClients(MoveProtocol.MOVE_RESPONSE + "\n" + JsonObjectMapper.toJson(moveMessage));
         }
     }
 
@@ -131,13 +126,10 @@ public class ClientHandler implements IClientHandler {
                         hurtMessage.setEntityId(entityToHurt.getId());
                     } else
                         hurtMessage.setEntityId(-1);
-                    synchronized (this) {
-                        GameServer.getServer().notifyClients(AttackProtocol.HURT_RESPONSE);
-                        try {
-                            GameServer.getServer().notifyClients(JsonObjectMapper.toJson(hurtMessage));
-                        } catch (JsonProcessingException e) {
-                            e.printStackTrace();
-                        }
+                    try {
+                        GameServer.getServer().notifyClients(AttackProtocol.HURT_RESPONSE + "\n" + JsonObjectMapper.toJson(hurtMessage));
+                    } catch (JsonProcessingException e) {
+                        e.printStackTrace();
                     }
                 }
                 try {
@@ -146,5 +138,9 @@ public class ClientHandler implements IClientHandler {
                 }
             }
         }).start();
+    }
+
+    public Hero getHero() {
+        return hero;
     }
 }

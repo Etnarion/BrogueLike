@@ -1,9 +1,12 @@
 package server.controller;
 
+import model.elements.entities.Hero;
+
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -63,5 +66,24 @@ public class GameServer {
             writer.println(message);
             writer.flush();
         }
+    }
+
+    public void notifyClients(ClientHandler sender, String message) {
+        PrintWriter writer;
+        for (ClientWorker client : clientWorkers) {
+            if (client.getHandler().getHero() != sender.getHero()) {
+                writer = new PrintWriter(new OutputStreamWriter(client.getOs()));
+                writer.println(message);
+                writer.flush();
+            }
+        }
+    }
+
+    public ArrayList<Hero> getHeroes() {
+        ArrayList<Hero> heroes = new ArrayList<>();
+        for (ClientWorker clientWorker : clientWorkers) {
+            heroes.add(clientWorker.getHandler().getHero());
+        }
+        return heroes;
     }
 }

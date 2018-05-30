@@ -3,18 +3,21 @@ import java.awt.Point;
 import java.io.IOException;
 
 import model.Dungeon;
+import model.elements.Element;
+import model.elements.mechanisms.Door;
+import model.elements.tiles.Wall;
 import utils.Direction;
 import com.googlecode.lanterna.input.KeyStroke;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.*;
-import model.entities.Entity;
-import model.tiles.Tile;
+import model.elements.entities.Entity;
+import model.elements.tiles.Tile;
 import com.googlecode.lanterna.terminal.TerminalResizeListener;
 
 public class DungeonView implements TerminalResizeListener {
     private Terminal terminal;
-    private Tile[][] tmpMap;
+    final private Element[][] map;
 
     static DungeonView dungeonView;
 
@@ -30,15 +33,15 @@ public class DungeonView implements TerminalResizeListener {
         terminal = new DefaultTerminalFactory().createTerminal();
         terminal.setCursorVisible(false);
         terminal.addResizeListener(this);
-        showMap(Dungeon.getDungeon().getTiles());
+        map = Dungeon.getDungeon().getElements();
     }
 
-    public void showMap(Tile[][] map) throws IOException  {
+    public void showMap() throws IOException  {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 terminal.setBackgroundColor(new TextColor.RGB(map[i][j].color.getRed(), map[i][j].color.getGreen(), map[i][j].color.getBlue()));
                 terminal.putCharacter(map[i][j].symbol);
-                if (i == 0 || i == map.length-1 || j == 0 || j == map[i].length-1) {
+                if (map[i][j] instanceof Wall || map[i][j] instanceof Door) {
                     terminal.putCharacter(map[i][j].symbol);
                 } else
                     terminal.putCharacter(' ');
@@ -46,15 +49,14 @@ public class DungeonView implements TerminalResizeListener {
             terminal.setCursorPosition(0, i+1);
         }
         terminal.flush();
-        tmpMap = map;
     }
 
     @Override
     public void onResized(Terminal terminal, TerminalSize terminalSize) {
         try {
-            if (tmpMap != null) {
+            if (map != null) {
                 terminal.clearScreen();
-                showMap(tmpMap);
+                showMap();
             }
         } catch (IOException e) {
             return;
@@ -69,16 +71,15 @@ public class DungeonView implements TerminalResizeListener {
         terminal.flush();
     }
 
-    private void displayTile(Point pos) throws IOException {
-        Tile tile = tmpMap[pos.y][pos.x];
-        terminal.setBackgroundColor(new TextColor.RGB(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue()));
-        terminal.putCharacter(tmpMap[pos.y][pos.x].symbol);
-
+    public void displayElement(Point pos) throws IOException {
+        Element element = map[pos.y][pos.x];
+        terminal.setCursorPosition(pos.x * 2, pos.y);
+        terminal.setBackgroundColor(new TextColor.RGB(element.color.getRed(), element.color.getGreen(), element.color.getBlue()));
+        terminal.putCharacter(element.symbol);
     }
 
-    public synchronized void move(Entity entity, Point previousPos) throws IOException {
-        terminal.setCursorPosition(previousPos.x * 2, previousPos.y);
-        displayTile(new Point(previousPos.x, previousPos.y));
+    public void move(Entity entity, Point previousPos) throws IOException {
+        displayElement(new Point(previousPos.x, previousPos.y));
         displayEntity(entity);
     }
 
@@ -89,13 +90,13 @@ public class DungeonView implements TerminalResizeListener {
                 for (int i = 1; i <= range; i++) {
                     Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
                     if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
-                        Tile tile = tmpMap[curPos.y][curPos.x];
+                        Element element = map[curPos.y][curPos.x];
                         Entity curEntity = Dungeon.getDungeon().getEntity(new Point(curPos.x, curPos.y));
                         synchronized (this) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
                             terminal.setBackgroundColor(new TextColor.RGB(229, 99, 0));
                             if (curEntity == null)
-                                terminal.putCharacter(tile.symbol);
+                                terminal.putCharacter(element.symbol);
                             else
                                 terminal.putCharacter(curEntity.symbol);
                         }
@@ -106,9 +107,9 @@ public class DungeonView implements TerminalResizeListener {
                         }
                         synchronized (this) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
-                            terminal.setBackgroundColor(new TextColor.RGB(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue()));
+                            terminal.setBackgroundColor(new TextColor.RGB(element.color.getRed(), element.color.getGreen(), element.color.getBlue()));
                             if (curEntity == null)
-                                terminal.putCharacter(tile.symbol);
+                                terminal.putCharacter(element.symbol);
                             else
                                 terminal.putCharacter(curEntity.symbol);
                         }
@@ -135,6 +136,10 @@ public class DungeonView implements TerminalResizeListener {
 
     static public DungeonView getDungeonView() {
         return dungeonView;
+    }
+
+    public Terminal getTerminal() {
+        return terminal;
     }
 
 }

@@ -1,6 +1,6 @@
 package server;
 
-import model.tiles.Tile;
+import model.elements.tiles.Tile;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
