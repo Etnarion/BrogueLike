@@ -5,11 +5,13 @@ import com.googlecode.lanterna.terminal.Terminal;
 import model.Dungeon;
 import model.elements.entities.Hero;
 
-import java.awt.*;
 import java.io.IOException;
 
 public class HeroView {
+    private enum Positions {TOP, HEALTH, DAMAGE, RANGE, GOLD, BOTTOM}
     private final static int OFFSET_MENU = 2;
+    private final static int OFFSET_LABELS = 10;
+    private final static int OFFSET_RIGHT = 8;
     Terminal terminal;
     Hero hero;
 
@@ -20,28 +22,61 @@ public class HeroView {
         hero = Dungeon.getDungeon().getHero();
     }
 
-    public void showHealth() throws IOException {
+    public void showTopBorder() throws IOException {
         terminal.setCursorPosition(Dungeon.DUNGEON_SIZE*2 + OFFSET_MENU, OFFSET_MENU);
-        String currentHealth = String.valueOf(hero.getHealth());
-        String maxHealth = String.valueOf(hero.getMaxHealth());
-        formattedString(3, currentHealth);
-        terminal.setBackgroundColor(new TextColor.RGB(0,0,0));
-        terminal.putCharacter('/');
-        formattedString(3, maxHealth);
-        terminal.flush();
+        ViewUtils.putString("╔═════════════════════════╗", TextColor.ANSI.WHITE, terminal);
     }
 
-    private void formattedString(int size, String string) throws IOException {
-        int j = 0;
-        for (int i = 0; i < size; i++) {
-            if (i < size - string.length()) {
-                terminal.setBackgroundColor(new TextColor.RGB(0,0,0));
-                terminal.putCharacter('0');
-                j++;
-            } else {
-                terminal.setBackgroundColor(new TextColor.RGB(0,0,0));
-                terminal.putCharacter(string.charAt(i-j));
-            }
+    public void showBottomBorder() throws IOException {
+        terminal.setCursorPosition(Dungeon.DUNGEON_SIZE*2 + OFFSET_MENU, OFFSET_MENU + Positions.BOTTOM.ordinal());
+        ViewUtils.putString("╚═════════════════════════╝", TextColor.ANSI.WHITE, terminal);
+    }
+
+    public void showHealth() throws IOException {
+        synchronized (DungeonView.getDungeonView()) {
+            terminal.setCursorPosition(Dungeon.DUNGEON_SIZE * 2 + OFFSET_MENU, OFFSET_MENU + Positions.HEALTH.ordinal());
+            ViewUtils.putString("║ ", TextColor.ANSI.WHITE, terminal);
+            ViewUtils.putFormattedString("Health : ", OFFSET_LABELS, new TextColor.RGB(255, 255, 255), terminal);
+            String currentHealth = String.valueOf(hero.getHealth());
+            String maxHealth = String.valueOf(hero.getMaxHealth());
+            TextColor healthColor = new TextColor.RGB(188, 1, 1);
+            ViewUtils.putFormattedString(currentHealth, 3, healthColor, terminal);
+            ViewUtils.putString("/", healthColor, terminal);
+            ViewUtils.putFormattedString(maxHealth, 3, healthColor, terminal);
+            ViewUtils.putFormattedString("║", OFFSET_RIGHT, TextColor.ANSI.WHITE, terminal);
+        }
+    }
+
+    public void showDamage() throws IOException {
+        synchronized (DungeonView.getDungeonView()) {
+            terminal.setCursorPosition(Dungeon.DUNGEON_SIZE * 2 + OFFSET_MENU, OFFSET_MENU + Positions.DAMAGE.ordinal());
+            ViewUtils.putString("║ ", TextColor.ANSI.WHITE, terminal);
+            ViewUtils.putFormattedString("Damage : ", OFFSET_LABELS, new TextColor.RGB(255, 255, 255), terminal);
+            String damage = String.valueOf(hero.getDamage());
+            ViewUtils.putFormattedString(damage, 7, new TextColor.RGB(255, 255, 255), terminal);
+            ViewUtils.putFormattedString("║", OFFSET_RIGHT, TextColor.ANSI.WHITE, terminal);
+        }
+    }
+
+    public void showRange() throws IOException {
+        synchronized (DungeonView.getDungeonView()) {
+            terminal.setCursorPosition(Dungeon.DUNGEON_SIZE * 2 + OFFSET_MENU, OFFSET_MENU + Positions.RANGE.ordinal());
+            ViewUtils.putString("║ ", TextColor.ANSI.WHITE, terminal);
+            ViewUtils.putFormattedString("Range : ", OFFSET_LABELS, new TextColor.RGB(255, 255, 255), terminal);
+            String range = String.valueOf(hero.getRange());
+            ViewUtils.putFormattedString(range, 7, new TextColor.RGB(255, 255, 255), terminal);
+            ViewUtils.putFormattedString("║", OFFSET_RIGHT, TextColor.ANSI.WHITE, terminal);
+        }
+    }
+
+    public void showGold() throws IOException {
+        synchronized (DungeonView.getDungeonView()) {
+            terminal.setCursorPosition(Dungeon.DUNGEON_SIZE * 2 + OFFSET_MENU, OFFSET_MENU + Positions.GOLD.ordinal());
+            ViewUtils.putString("║ ", TextColor.ANSI.WHITE, terminal);
+            ViewUtils.putFormattedString("Gold : ", OFFSET_LABELS, new TextColor.RGB(255, 255, 255), terminal);
+            String gold = String.valueOf(hero.getGold());
+            ViewUtils.putFormattedString(gold, 7, new TextColor.RGB(255, 200, 2), terminal);
+            ViewUtils.putFormattedString("║", OFFSET_RIGHT, TextColor.ANSI.WHITE, terminal);
         }
     }
 

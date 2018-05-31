@@ -39,7 +39,8 @@ public class DungeonView implements TerminalResizeListener {
     public void showMap() throws IOException  {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                terminal.setBackgroundColor(new TextColor.RGB(map[i][j].color.getRed(), map[i][j].color.getGreen(), map[i][j].color.getBlue()));
+                terminal.setForegroundColor(map[i][j].fontColor);
+                terminal.setBackgroundColor(map[i][j].color);
                 terminal.putCharacter(map[i][j].symbol);
                 if (map[i][j] instanceof Wall || map[i][j] instanceof Door) {
                     terminal.putCharacter(map[i][j].symbol);
@@ -64,9 +65,9 @@ public class DungeonView implements TerminalResizeListener {
     }
 
     public void displayEntity(Entity entity) throws IOException {
-        Tile tile = entity.tile();
         terminal.setCursorPosition(entity.position().x*2, entity.position().y);
-        terminal.setBackgroundColor(new TextColor.RGB(tile.color.getRed(), tile.color.getGreen(), tile.color.getBlue()));
+        terminal.setForegroundColor(entity.fontColor);
+        terminal.setBackgroundColor(entity.color);
         terminal.putCharacter(entity.symbol);
         terminal.flush();
     }
@@ -74,8 +75,10 @@ public class DungeonView implements TerminalResizeListener {
     public void displayElement(Point pos) throws IOException {
         Element element = map[pos.y][pos.x];
         terminal.setCursorPosition(pos.x * 2, pos.y);
-        terminal.setBackgroundColor(new TextColor.RGB(element.color.getRed(), element.color.getGreen(), element.color.getBlue()));
+        terminal.setForegroundColor(element.fontColor);
+        terminal.setBackgroundColor(element.color);
         terminal.putCharacter(element.symbol);
+        terminal.flush();
     }
 
     public void move(Entity entity, Point previousPos) throws IOException {
@@ -86,34 +89,33 @@ public class DungeonView implements TerminalResizeListener {
     public void attack(Entity entity, Direction direction, int range) {
         new Thread(() -> {
             try {
-                Point position = entity.position();
-                for (int i = 1; i <= range; i++) {
-                    Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
-                    if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
-                        Element element = map[curPos.y][curPos.x];
-                        Entity curEntity = Dungeon.getDungeon().getEntity(new Point(curPos.x, curPos.y));
-                        synchronized (this) {
+                synchronized (DungeonView.getDungeonView()) {
+                    Point position = entity.position();
+                    for (int i = 1; i <= range; i++) {
+                        Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
+                        if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
+                            Element element = map[curPos.y][curPos.x];
+                            Entity curEntity = Dungeon.getDungeon().getEntity(new Point(curPos.x, curPos.y));
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
                             terminal.setBackgroundColor(new TextColor.RGB(229, 99, 0));
                             if (curEntity == null)
                                 terminal.putCharacter(element.symbol);
                             else
                                 terminal.putCharacter(curEntity.symbol);
-                        }
-                        terminal.flush();
-                        try {
-                            Thread.sleep(100);
-                        } catch (InterruptedException ie) {
-                        }
-                        synchronized (this) {
+                            terminal.flush();
+                            try {
+                                Thread.sleep(100);
+                            } catch (InterruptedException ie) {
+                            }
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
-                            terminal.setBackgroundColor(new TextColor.RGB(element.color.getRed(), element.color.getGreen(), element.color.getBlue()));
+                            terminal.setForegroundColor(element.fontColor);
+                            terminal.setBackgroundColor(element.color);
                             if (curEntity == null)
                                 terminal.putCharacter(element.symbol);
                             else
                                 terminal.putCharacter(curEntity.symbol);
+                            terminal.flush();
                         }
-                        terminal.flush();
                     }
                 }
             } catch (IOException e) {

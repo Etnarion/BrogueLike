@@ -1,5 +1,7 @@
 package model.elements.mechanisms;
 
+import com.googlecode.lanterna.TextColor;
+
 import java.awt.*;
 import java.util.ArrayList;
 
@@ -13,7 +15,7 @@ public class Button extends Mechanism {
         symbol = 'o';
         walkable = true;
         activated = false;
-        color = Color.DARK_GRAY;
+        color = new TextColor.RGB(48, 48, 48);
     }
 
     public void linkElement(Mechanism mechanism) {

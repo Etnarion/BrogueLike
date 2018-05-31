@@ -1,7 +1,6 @@
 package model.elements.entities;
 
-import model.Dungeon;
-import model.elements.mechanisms.Mechanism;
+import com.googlecode.lanterna.TextColor;
 import model.elements.weapons.Gun;
 import model.elements.weapons.Weapon;
 import utils.ExtendedAscii;
@@ -19,8 +18,7 @@ public class Hero extends Entity {
         symbol = 'X';
         gold = 0;
         weapon = new Gun(4, 3, 1);
-        color = Color.DARK_GRAY;
-        fontColor = Color.ORANGE;
+        fontColor = new TextColor.RGB(255, 178, 0);
     }
 
     public int getRange() {

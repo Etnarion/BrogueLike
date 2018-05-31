@@ -1,5 +1,7 @@
 package model.elements.mechanisms;
 
+import com.googlecode.lanterna.TextColor;
+
 import java.awt.*;
 
 public class DescendingStairs extends Mechanism {
@@ -8,7 +10,7 @@ public class DescendingStairs extends Mechanism {
         super(position);
         symbol = '<';
         walkable = true;
-        color = Color.BLACK;
+        color = TextColor.ANSI.BLACK;
     }
 
     @Override

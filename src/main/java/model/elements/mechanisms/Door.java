@@ -1,5 +1,8 @@
 package model.elements.mechanisms;
 
+import client.view.ViewUtils;
+import com.googlecode.lanterna.TextColor;
+
 import java.awt.*;
 
 public class Door extends Mechanism {
@@ -7,12 +10,12 @@ public class Door extends Mechanism {
         super(position);
         symbol = ' ';
         walkable = false;
-        color = new Color(112, 75, 28);
+        color = new TextColor.RGB(112, 75, 28);
     }
 
     @Override
     public boolean activate() {
-        color = Color.DARK_GRAY;
+        color = ViewUtils.DEFAULT_COLOR;
         walkable = !walkable;
         return true;
     }

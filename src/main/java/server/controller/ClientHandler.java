@@ -118,7 +118,7 @@ public class ClientHandler implements IClientHandler {
     private void hurtEntities(HurtCommandResponse hurtMessage, Direction direction) {
         new Thread(() -> {
             for (int i = 1; i <= hero.getRange(); i++) {
-                Point position = new Point(hero.position().x + i * direction.x(), hero.position().y + direction.y() + i * direction.y());
+                Point position = new Point(hero.position().x + i * direction.x(), hero.position().y + i * direction.y());
                 if (position.x < Dungeon.DUNGEON_SIZE && position.x >= 0 && position.y < Dungeon.DUNGEON_SIZE && position.y >= 0) {
                     Entity entityToHurt = Dungeon.getDungeon().getEntity(position);
                     if (entityToHurt != null) {
