@@ -12,7 +12,6 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import com.googlecode.lanterna.terminal.Terminal;
 import com.googlecode.lanterna.*;
 import model.elements.entities.Entity;
-import model.elements.tiles.Tile;
 import com.googlecode.lanterna.terminal.TerminalResizeListener;
 
 public class DungeonView implements TerminalResizeListener {
@@ -67,7 +66,7 @@ public class DungeonView implements TerminalResizeListener {
     public void displayEntity(Entity entity) throws IOException {
         terminal.setCursorPosition(entity.position().x*2, entity.position().y);
         terminal.setForegroundColor(entity.fontColor);
-        terminal.setBackgroundColor(entity.color);
+        terminal.setBackgroundColor(Dungeon.getDungeon().getTiles()[entity.position().y][entity.position().x].color);
         terminal.putCharacter(entity.symbol);
         terminal.flush();
     }
@@ -89,13 +88,14 @@ public class DungeonView implements TerminalResizeListener {
     public void attack(Entity entity, Direction direction, int range) {
         new Thread(() -> {
             try {
-                synchronized (DungeonView.getDungeonView()) {
-                    Point position = entity.position();
-                    for (int i = 1; i <= range; i++) {
-                        Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
-                        if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
-                            Element element = map[curPos.y][curPos.x];
-                            Entity curEntity = Dungeon.getDungeon().getEntity(new Point(curPos.x, curPos.y));
+
+                Point position = entity.position();
+                for (int i = 1; i <= range; i++) {
+                    Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
+                    if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
+                        Element element = map[curPos.y][curPos.x];
+                        Entity curEntity = Dungeon.getDungeon().getEntity(new Point(curPos.x, curPos.y));
+                        synchronized (DungeonView.getDungeonView()) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
                             terminal.setBackgroundColor(new TextColor.RGB(229, 99, 0));
                             if (curEntity == null)
@@ -103,10 +103,12 @@ public class DungeonView implements TerminalResizeListener {
                             else
                                 terminal.putCharacter(curEntity.symbol);
                             terminal.flush();
-                            try {
-                                Thread.sleep(100);
-                            } catch (InterruptedException ie) {
-                            }
+                        }
+                        try {
+                            Thread.sleep(100);
+                        } catch (InterruptedException ie) {
+                        }
+                        synchronized (DungeonView.getDungeonView()) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
                             terminal.setForegroundColor(element.fontColor);
                             terminal.setBackgroundColor(element.color);
