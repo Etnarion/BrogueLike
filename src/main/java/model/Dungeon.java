@@ -2,6 +2,7 @@ package model;
 
 import client.view.DungeonView;
 import model.elements.Element;
+import model.elements.items.Item;
 import model.elements.mechanisms.Button;
 import model.elements.mechanisms.DescendingStairs;
 import model.elements.mechanisms.Door;
@@ -21,6 +22,7 @@ public class Dungeon {
     private static int idEntity = 50;
     private Tile[][] tiles;
     private Entity[][] entities;
+    private Item[][] items;
     private Mechanism[][] mechanisms;
     private Element[][] elements;
     private Hero hero;
@@ -32,6 +34,7 @@ public class Dungeon {
     private Dungeon() {
         tiles = new Tile[DUNGEON_SIZE][DUNGEON_SIZE];
         entities = new Entity[DUNGEON_SIZE][DUNGEON_SIZE];
+        items = new Item[DUNGEON_SIZE][DUNGEON_SIZE];
         mechanisms = new Mechanism[DUNGEON_SIZE][DUNGEON_SIZE];
         elements = new Element[DUNGEON_SIZE][DUNGEON_SIZE];
         generateDungeon();
@@ -141,7 +144,7 @@ public class Dungeon {
     }
 
     public Element getElement(Point position) {
-        return mechanisms[position.y][position.x];
+        return elements[position.y][position.x];
     }
 
     public Entity getEntity(int id) {
@@ -188,6 +191,21 @@ public class Dungeon {
     public void placeEntity(Entity entity) {
         entities[entity.position().y][entity.position().x] = entity;
         elements[entity.position().y][entity.position().x] = entity;
+    }
+
+    public void removeEntity(Entity entity) {
+        entities[entity.position().y][entity.position().x] = null;
+        elements[entity.position().y][entity.position().x] = null;
+    }
+
+    public void placeItem(Item item) {
+        items[item.position().y][item.position().x] = item;
+        elements[item.position().y][item.position().x] = item;
+    }
+
+    public void removeItem(Item item) {
+        items[item.position().y][item.position().x] = null;
+        elements[item.position().y][item.position().x] = null;
     }
 
     public Tile[][] getTiles() { return tiles; }

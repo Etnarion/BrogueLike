@@ -2,13 +2,17 @@ package model.elements.entities;
 
 import model.Dungeon;
 import model.elements.Element;
+import model.elements.items.Item;
+import model.elements.items.weapons.Sword;
 import model.elements.tiles.Tile;
 
 import java.awt.*;
+import java.util.ArrayList;
 
 public abstract class Entity extends Element {
     protected boolean walkable;
     private int id;
+    protected ArrayList<Item> loot;
 
     private int maxHealth;
     private int health;
@@ -18,6 +22,7 @@ public abstract class Entity extends Element {
 
     public Entity (Point position, int id) {
         super(position);
+        loot = new ArrayList<>();
         this.id = id;
         maxHealth = 20;
         health = 20;
@@ -73,6 +78,10 @@ public abstract class Entity extends Element {
 
     public void die() {
         alive = false;
+    }
+
+    public void dropLoot() {
+        Dungeon dungeon = Dungeon.getDungeon();
     }
 
     public boolean isWalkable() {

@@ -90,7 +90,9 @@ public class DungeonView implements TerminalResizeListener {
             try {
 
                 Point position = entity.position();
-                for (int i = 1; i <= range; i++) {
+                boolean wallFound = false;
+                int i = 1;
+                while (i <= range && !wallFound) {
                     Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
                     if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
                         Element element = map[curPos.y][curPos.x];
@@ -118,6 +120,8 @@ public class DungeonView implements TerminalResizeListener {
                                 terminal.putCharacter(curEntity.symbol);
                             terminal.flush();
                         }
+                        wallFound = !Dungeon.getDungeon().getElement(curPos).isWalkable();
+                        i++;
                     }
                 }
             } catch (IOException e) {

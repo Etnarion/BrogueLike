@@ -25,18 +25,10 @@ public class ClientController implements Runnable {
         this.out = out;
         Dungeon.getDungeon();
         DungeonView.getDungeonView();
-        showStatus();
+        HeroView.getHeroView().showStatus();
     }
 
-    private synchronized void showStatus() throws IOException {
-        HeroView heroView = HeroView.getHeroView();
-        heroView.showTopBorder();
-        heroView.showHealth();
-        heroView.showDamage();
-        heroView.showRange();
-        heroView.showGold();
-        heroView.showBottomBorder();
-    }
+
 
     private void listen() throws IOException {
         String line;

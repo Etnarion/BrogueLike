@@ -117,7 +117,9 @@ public class ClientHandler implements IClientHandler {
 
     private void hurtEntities(HurtCommandResponse hurtMessage, Direction direction) {
         new Thread(() -> {
-            for (int i = 1; i <= hero.getRange(); i++) {
+            int i = 1;
+            boolean wallFound = false;
+            while (i <= hero.getRange() && !wallFound) {
                 Point position = new Point(hero.position().x + i * direction.x(), hero.position().y + i * direction.y());
                 if (position.x < Dungeon.DUNGEON_SIZE && position.x >= 0 && position.y < Dungeon.DUNGEON_SIZE && position.y >= 0) {
                     Entity entityToHurt = Dungeon.getDungeon().getEntity(position);
@@ -131,11 +133,13 @@ public class ClientHandler implements IClientHandler {
                     } catch (JsonProcessingException e) {
                         e.printStackTrace();
                     }
+                    wallFound = !Dungeon.getDungeon().getElement(position).isWalkable();
                 }
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException ie) {
                 }
+                i++;
             }
         }).start();
     }

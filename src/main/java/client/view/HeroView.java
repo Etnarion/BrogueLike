@@ -91,4 +91,14 @@ public class HeroView {
     public static HeroView getHeroView() {
         return heroView;
     }
+
+    public synchronized void showStatus() throws IOException {
+        HeroView heroView = HeroView.getHeroView();
+        heroView.showTopBorder();
+        heroView.showHealth();
+        heroView.showDamage();
+        heroView.showRange();
+        heroView.showGold();
+        heroView.showBottomBorder();
+    }
 }
