@@ -16,7 +16,7 @@ public class PathFinder {
 
     public PathFinder(DungeonGraph graph, Point position) {
         this.graph = graph;
-        source = position.y * (Dungeon.DUNGEON_SIZE) + position.x;
+        source = position.x * (Dungeon.DUNGEON_SIZE) + position.y;
         edgeTo = new int[graph.V()];
         distTo = new int[graph.V()];
         marked = new boolean[graph.V()];

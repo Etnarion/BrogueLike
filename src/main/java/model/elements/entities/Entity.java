@@ -5,6 +5,7 @@ import model.elements.Element;
 import model.elements.items.Item;
 import model.elements.items.weapons.Sword;
 import model.elements.tiles.Tile;
+import utils.Direction;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -43,6 +44,10 @@ public abstract class Entity extends Element {
     }
 
     public void setHealth(int health) {
+        if (health < 0)
+            health = 0;
+        else if (health > maxHealth)
+            health = maxHealth;
         this.health = health;
     }
 
@@ -65,6 +70,11 @@ public abstract class Entity extends Element {
 
     public void move(Point nextPos) {
         position = nextPos;
+    }
+
+    public void move(Direction direction) {
+        position.x = position.x + direction.x();
+        position.y = position.y + direction.y();
     }
 
     public void hurt(int damage) {

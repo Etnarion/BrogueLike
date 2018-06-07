@@ -25,4 +25,18 @@ public enum Direction {
     public int y () {
         return direction.y;
     }
+
+    public static Direction getDirection(Point pos, Point newPos) {
+        int x = newPos.x - pos.x;
+        int y = newPos.y - pos.y;
+
+        if (y == -1)
+            return LEFT;
+        else if (y == 1)
+            return RIGHT;
+        else if (x == -1)
+            return UP;
+        else
+            return DOWN;
+    }
 }

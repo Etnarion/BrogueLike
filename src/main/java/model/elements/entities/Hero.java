@@ -2,6 +2,7 @@ package model.elements.entities;
 
 import com.googlecode.lanterna.TextColor;
 import model.elements.items.weapons.Gun;
+import model.elements.items.weapons.Sword;
 import model.elements.items.weapons.Weapon;
 import utils.ExtendedAscii;
 
@@ -17,7 +18,7 @@ public class Hero extends Entity {
         super(position, id);
         symbol = 'X';
         gold = 0;
-        weapon = new Gun(position, 4, 5, 1);
+        weapon = new Sword(position, 1, 1, 1);
         fontColor = new TextColor.RGB(255, 178, 0);
     }
 
@@ -38,6 +39,20 @@ public class Hero extends Entity {
 
     public void setGold(int gold) {
         this.gold = gold;
+    }
+
+    public void setWeapon(Weapon weapon) {
+        this.weapon = weapon;
+    }
+
+    public Weapon getWeapon() {
+        return weapon;
+    }
+
+    @Override
+    public void move(Point nextPos) {
+        super.move(nextPos);
+        weapon.setPosition(nextPos);
     }
 
     @Override

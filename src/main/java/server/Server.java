@@ -8,5 +8,6 @@ public class Server {
     public static void main(String ... args) throws IOException {
         GameServer server = GameServer.getServer();
         server.startServer();
+        server.moveEnemies();
     }
 }

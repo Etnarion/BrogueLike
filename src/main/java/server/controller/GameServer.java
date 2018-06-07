@@ -1,13 +1,25 @@
 package server.controller;
 
+import client.view.DungeonView;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import model.Dungeon;
+import model.DungeonGraph;
+import model.elements.entities.Enemy;
 import model.elements.entities.Hero;
+import model.elements.entities.PathFinder;
+import protocol.MoveCommandResponse;
+import protocol.MoveProtocol;
+import utils.Direction;
+import utils.JsonObjectMapper;
 
+import java.awt.*;
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Stack;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GameServer {
@@ -30,23 +42,20 @@ public class GameServer {
         serverSocket = new ServerSocket();
         serverSocket.bind(new InetSocketAddress(port));
 
-        Thread serverThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (true) {
-                    try {
-                        Socket clientSocket = serverSocket.accept();
-                        nbClients++;
-                        ClientWorker clientWorker = new ClientWorker(clientSocket, getClientHandler(), GameServer.this);
-                        clientWorkers.add(clientWorker);
-                        Thread clientThread = new Thread(clientWorker);
-                        clientThread.start();
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+        Thread serverThread = new Thread(() -> {
+            while (true) {
+                try {
+                    Socket clientSocket = serverSocket.accept();
+                    nbClients++;
+                    ClientWorker clientWorker = new ClientWorker(clientSocket, getClientHandler(), GameServer.this);
+                    clientWorkers.add(clientWorker);
+                    Thread clientThread = new Thread(clientWorker);
+                    clientThread.start();
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
-
             }
+
         });
         serverThread.start();
     }
@@ -85,5 +94,54 @@ public class GameServer {
             heroes.add(clientWorker.getHandler().getHero());
         }
         return heroes;
+    }
+
+    public void moveEnemies() {
+        for(Enemy[] es : Dungeon.getDungeon().getEnemies()) {
+            for (Enemy e : es) {
+                if (e != null) {
+                    new Thread(() -> {
+                        while (e.isAlive()) {
+                            Hero closestHero = Dungeon.getDungeon().findClosestHero(e.position(), e.getVision());
+                            if (closestHero != null) {
+                                PathFinder pathFinder = new PathFinder(new DungeonGraph(Dungeon.getDungeon().getTiles()), e.position());
+                                Stack<Integer> path = pathFinder.pathTo(closestHero.position().y * Dungeon.DUNGEON_SIZE + closestHero.position().x);
+
+                                if (!path.empty()) {
+                                    path.pop();
+                                    if (!path.empty()) {
+                                        int nextMove = path.pop();
+                                        int y = nextMove % Dungeon.DUNGEON_SIZE;
+                                        int x = nextMove / Dungeon.DUNGEON_SIZE;
+                                        Point newPos = new Point(x, y);
+                                        Point prevPos = e.position();
+                                        e.move(newPos);
+                                        try {
+                                            moveEntity(e.getId(), Direction.getDirection(prevPos, newPos));
+                                        } catch (JsonProcessingException e1) {
+                                            e1.printStackTrace();
+                                        }
+                                    }
+
+                                }
+                                try {
+                                    Thread.sleep(500);
+                                } catch (InterruptedException ie) {
+                                }
+                            }
+                            if (Dungeon.getDungeon().isStopping())
+                                return;
+                        }
+                    }).start();
+                }
+            }
+        }
+    }
+
+    private void moveEntity(int idEntity, Direction direction) throws JsonProcessingException {
+        MoveCommandResponse moveResponse = new MoveCommandResponse();
+        moveResponse.setId(idEntity);
+        moveResponse.setDirection(direction);
+        GameServer.getServer().notifyClients(MoveProtocol.MOVE_RESPONSE + "\n" + JsonObjectMapper.toJson(moveResponse));
     }
 }

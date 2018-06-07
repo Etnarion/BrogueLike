@@ -36,17 +36,17 @@ public class DungeonGraph {
     private void arrayToAdjacencyList(Tile[][] map) {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
-                if (!(map[i][j].isWalkable())) {
-                    if (!(map[i-1][j].isWalkable())) {
+                if (map[i][j].isWalkable()) {
+                    if (i-1 > 0 && map[i-1][j].isWalkable()) {
                         addEdge(i*map.length+j, (i-1)*map.length+j);
                     }
-                    if (!(map[i+1][j].isWalkable())) {
+                    if (i+1 < map.length && map[i+1][j].isWalkable()) {
                         addEdge(i*map.length+j, (i+1)*map.length+j);
                     }
-                    if (!(map[i][j-1].isWalkable())) {
+                    if (j-1 > 0 && map[i][j-1].isWalkable()) {
                         addEdge(i*map.length+j, i*map.length+j-1);
                     }
-                    if (!(map[i][j+1].isWalkable())) {
+                    if (j-1 < map.length && map[i][j+1].isWalkable()) {
                         addEdge(i*map.length+j, i*map.length+j+1);
                     }
                 }

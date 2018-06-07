@@ -15,6 +15,7 @@ public class Spider extends Enemy {
         color = ViewUtils.DEFAULT_COLOR;
         loot.add(new Gold(position, 30));
         loot.add(new Sword(position, 2, 1, 1));
+        vision = 6;
     }
 
     @Override

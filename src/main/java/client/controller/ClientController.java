@@ -5,6 +5,9 @@ import com.fasterxml.jackson.core.JsonParseException;
 import model.Dungeon;
 import model.elements.entities.Entity;
 import model.elements.entities.Hero;
+import model.elements.entities.Spider;
+import model.elements.items.Item;
+import model.elements.items.weapons.Weapon;
 import model.elements.mechanisms.Button;
 import model.elements.mechanisms.Mechanism;
 import utils.JsonObjectMapper;
@@ -30,7 +33,7 @@ public class ClientController implements Runnable {
 
 
 
-    private void listen() throws IOException {
+    private void listen() throws IOException, InterruptedException {
         String line;
         while (true) {
             line = in.readLine();
@@ -95,8 +98,31 @@ public class ClientController implements Runnable {
                     if (button != null) {
                         button.activate();
                         for (Mechanism mechanism : button.getLinkedMechanisms()) {
-                            DungeonView.getDungeonView().displayElement(new Point(mechanism.position().y, mechanism.position().x));
+                            DungeonView.getDungeonView().displayElement(mechanism.position());
                         }
+                    }
+                    break;
+                case GameProtocol.LOOT :
+                    LootResponse lootResponse = JsonObjectMapper.parseJson(in.readLine(), LootResponse.class);
+                    Item item = Dungeon.getDungeon().getItem(lootResponse.getItemId());
+                    Hero lootHero = (Hero)Dungeon.getDungeon().getEntity(lootResponse.getHeroId());
+                    if (item != null) {
+                        item.pickup(lootHero.position());
+                        Weapon oldWeapon = lootHero.getWeapon();
+                        DungeonView.getDungeonView().displayElement(oldWeapon.position());
+                        HeroView.getHeroView().showStatus();
+                    }
+                    break;
+                case GameProtocol.NEW_LEVEL :
+                    synchronized (Dungeon.getDungeon()) {
+                        Dungeon.getDungeon().setStopping(true);
+                        Dungeon.getDungeon().loadNewMap();
+                        DungeonView.getDungeonView().showMap();
+                        Hero he = Dungeon.getDungeon().getHero();
+                        he.setPosition(new Point(2+he.getId(), 2));
+                        Dungeon.getDungeon().placeEntity(he);
+                        DungeonView.getDungeonView().displayEntity(he);
+                        Dungeon.getDungeon().setStopping(false);
                     }
                     break;
                 default:
@@ -110,6 +136,8 @@ public class ClientController implements Runnable {
         try {
             listen();
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
             e.printStackTrace();
         }
     }

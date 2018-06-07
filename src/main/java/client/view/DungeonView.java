@@ -16,9 +16,11 @@ import com.googlecode.lanterna.terminal.TerminalResizeListener;
 
 public class DungeonView implements TerminalResizeListener {
     private Terminal terminal;
-    final private Element[][] map;
+    private Element[][] map;
+    private Element[][] tileMap;
 
-    static DungeonView dungeonView;
+
+    private static DungeonView dungeonView;
 
     static {
         try {
@@ -28,18 +30,22 @@ public class DungeonView implements TerminalResizeListener {
         }
     }
 
-    public DungeonView() throws IOException {
+    private DungeonView() throws IOException {
         terminal = new DefaultTerminalFactory().createTerminal();
         terminal.setCursorVisible(false);
         terminal.addResizeListener(this);
         map = Dungeon.getDungeon().getElements();
+        tileMap = Dungeon.getDungeon().getTiles();
     }
 
     public void showMap() throws IOException  {
+        terminal.clearScreen();
+        terminal.flush();
+        terminal.setCursorPosition(0, 0);
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 terminal.setForegroundColor(map[i][j].fontColor);
-                terminal.setBackgroundColor(map[i][j].color);
+                terminal.setBackgroundColor(tileMap[i][j].color);
                 terminal.putCharacter(map[i][j].symbol);
                 if (map[i][j] instanceof Wall || map[i][j] instanceof Door) {
                     terminal.putCharacter(map[i][j].symbol);
@@ -55,11 +61,9 @@ public class DungeonView implements TerminalResizeListener {
     public void onResized(Terminal terminal, TerminalSize terminalSize) {
         try {
             if (map != null) {
-                terminal.clearScreen();
                 showMap();
             }
-        } catch (IOException e) {
-            return;
+        } catch (IOException ignored) {
         }
     }
 
@@ -108,7 +112,7 @@ public class DungeonView implements TerminalResizeListener {
                         }
                         try {
                             Thread.sleep(100);
-                        } catch (InterruptedException ie) {
+                        } catch (InterruptedException ignored) {
                         }
                         synchronized (DungeonView.getDungeonView()) {
                             terminal.setCursorPosition(curPos.x * 2, curPos.y);
@@ -123,6 +127,8 @@ public class DungeonView implements TerminalResizeListener {
                         wallFound = !Dungeon.getDungeon().getElement(curPos).isWalkable();
                         i++;
                     }
+                    if (Dungeon.getDungeon().isStopping())
+                        return;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -146,7 +152,7 @@ public class DungeonView implements TerminalResizeListener {
         return dungeonView;
     }
 
-    public Terminal getTerminal() {
+    Terminal getTerminal() {
         return terminal;
     }
 

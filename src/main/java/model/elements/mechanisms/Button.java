@@ -25,7 +25,7 @@ public class Button extends Mechanism {
     @Override
     public boolean activate() {
         if (!activated) {
-            activated = !activated;
+            activated = true;
             symbol = '0';
             for (Mechanism mechanism : linkedMechanisms) {
                 mechanism.activate();

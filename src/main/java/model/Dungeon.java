@@ -2,7 +2,11 @@ package model;
 
 import client.view.DungeonView;
 import model.elements.Element;
+import model.elements.entities.Enemy;
 import model.elements.items.Item;
+import model.elements.items.consumable.Gold;
+import model.elements.items.consumable.Heart;
+import model.elements.items.weapons.Sword;
 import model.elements.mechanisms.Button;
 import model.elements.mechanisms.DescendingStairs;
 import model.elements.mechanisms.Door;
@@ -17,28 +21,36 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Stack;
 
 public class Dungeon {
     private static int idEntity = 50;
     private Tile[][] tiles;
     private Entity[][] entities;
+    private Enemy[][] enemies;
     private Item[][] items;
     private Mechanism[][] mechanisms;
     private Element[][] elements;
     private Hero hero;
+    private Stack<String> dungeons;
+    private boolean stopping = false;
 
     static private Dungeon dungeon = new Dungeon();
 
     final public static int DUNGEON_SIZE = 24;
 
     private Dungeon() {
+        dungeons = new Stack<>();
+        dungeons.push("2.txt");
+        dungeons.push("1.txt");
         tiles = new Tile[DUNGEON_SIZE][DUNGEON_SIZE];
         entities = new Entity[DUNGEON_SIZE][DUNGEON_SIZE];
+        enemies = new Enemy[DUNGEON_SIZE][DUNGEON_SIZE];
         items = new Item[DUNGEON_SIZE][DUNGEON_SIZE];
         mechanisms = new Mechanism[DUNGEON_SIZE][DUNGEON_SIZE];
         elements = new Element[DUNGEON_SIZE][DUNGEON_SIZE];
         generateDungeon();
-
     }
 
     public void initHero(Hero hero) throws IOException {
@@ -46,14 +58,28 @@ public class Dungeon {
     }
 
     public void initHero(int id) throws IOException {
-        hero = new Hero(new Point(4+id, 4), id);
+        hero = new Hero(new Point(2+id, 2), id);
         placeEntity(hero);
         DungeonView.getDungeonView().displayEntity(hero);
     }
 
+    public void loadNewMap() {
+        for (int i = 0; i < DUNGEON_SIZE; i++) {
+            for (int j = 0; j < DUNGEON_SIZE; j++) {
+                tiles[i][j] = null;
+                entities[i][j] = null;
+                enemies[i][j] = null;
+                items[i][j] = null;
+                mechanisms[i][j] = null;
+                elements[i][j] = null;
+            }
+        }
+        generateDungeon();
+    }
+
     public void generateDungeon() {
         try {
-            BufferedReader br = new BufferedReader(new FileReader("./data/dungeon.txt"));
+            BufferedReader br = new BufferedReader(new FileReader("./data/" + dungeons.pop()));
             String line = br.readLine();
 
             //Generate tiles, mechanisms and entities
@@ -61,43 +87,63 @@ public class Dungeon {
                 for (int j = 0; j < line.length(); j++) {
                     switch(line.charAt(j)) {
                         case 'w':
-                            tiles[i][j] = new Wall(new Point(i, j));
+                            tiles[i][j] = new Wall(new Point(j, i));
                             elements[i][j] = tiles[i][j];
                             break;
                         case 'g':
-                            tiles[i][j] = new Ground(new Point(i, j));
+                            tiles[i][j] = new Ground(new Point(j, i));
                             elements[i][j] = tiles[i][j];
                             break;
                         case 's':
-                            tiles[i][j] = new ShallowWater(new Point(i, j));
+                            tiles[i][j] = new ShallowWater(new Point(j, i));
                             elements[i][j] = tiles[i][j];
                             break;
                         case 'd':
-                            tiles[i][j] = new DeepWater(new Point(i, j));
+                            tiles[i][j] = new DeepWater(new Point(j, i));
                             elements[i][j] = tiles[i][j];
                             break;
                         case '-' :
-                            tiles[i][j] = new Ground(new Point(i, j));
-                            mechanisms[i][j] = new Door(new Point(i, j));
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            mechanisms[i][j] = new Door(new Point(j, i));
                             elements[i][j] = mechanisms[i][j];
                             break;
                         case 'a' :
-                            tiles[i][j] = new Ground(new Point(i, j));
-                            entities[i][j] = new Spider(new Point(i, j), idEntity++);
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            entities[i][j] = new Spider(new Point(j, i), idEntity++);
+                            enemies[i][j] = (Enemy)entities[i][j];
                             elements[i][j] = entities[i][j];
                             break;
                         case 'O' :
-                            tiles[i][j] = new Ground(new Point(i, j));
-                            mechanisms[i][j] = new Button(new Point(i, j));
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            mechanisms[i][j] = new Button(new Point(j, i));
                             elements[i][j] = mechanisms[i][j];
                             break;
                         case '<' :
-                            tiles[i][j] = new Ground(new Point(i, j));
-                            mechanisms[i][j] = new DescendingStairs(new Point(i, j));
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            mechanisms[i][j] = new DescendingStairs(new Point(j, i));
                             elements[i][j] = mechanisms[i][j];
                             break;
+                        case 'X' :
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            elements[i][j] = tiles[i][j];
+                            break;
+                        case '$' :
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            items[i][j] = new Gold(new Point(j, i), 30);
+                            elements[i][j] = items[i][j];
+                            break;
+                        case 'h' :
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            items[i][j] = new Heart(new Point(j, i), 5);
+                            elements[i][j] = items[i][j];
+                            break;
+                        case '/' :
+                            tiles[i][j] = new Ground(new Point(j, i));
+                            items[i][j] = new Sword(new Point(j, i), 4, 1, 1);
+                            elements[i][j] = items[i][j];
+                            break;
                         default:
-                            tiles[i][j] = new Ground(new Point(i, j));
+                            tiles[i][j] = new Ground(new Point(j, i));
                             elements[i][j] = tiles[i][j];
                             break;
                     }
@@ -117,7 +163,29 @@ public class Dungeon {
             e.printStackTrace();
         }
 
+    }
 
+    public Hero findClosestHero(Point position, int range) {
+        for (int i = 1; i <= range; i++) {
+            for (int j = position.x-i; j <= position.x+i; j++) {
+                for (int k = position.y-i; k <= position.y+i; k++) {
+                    if (k > 0 && j > 0 && k < DUNGEON_SIZE && j < DUNGEON_SIZE) {
+                        if (entities[k][j] instanceof Hero) {
+                            return (Hero)entities[k][j];
+                        }
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean isStopping() {
+        return stopping;
+    }
+
+    public void setStopping(boolean stopping) {
+        this.stopping = stopping;
     }
 
     public Tile getTile(Point position) {
@@ -137,6 +205,17 @@ public class Dungeon {
             for (Mechanism mechanism : mechLine) {
                 if (mechanism != null && mechanism.getId() == id) {
                     return mechanism;
+                }
+            }
+        }
+        return null;
+    }
+
+    public Item getItem(int id) {
+        for (Item[] itemLine : items) {
+            for (Item item : itemLine) {
+                if (item != null && item.getId() == id) {
+                    return item;
                 }
             }
         }
@@ -178,8 +257,11 @@ public class Dungeon {
         }
         entities[entity.position().y][entity.position().x] = null;
         Mechanism mechanism = mechanisms[entity.position().y][entity.position().x];
+        Item item = items[entity.position().y][entity.position().x];
         if (mechanism != null)
             elements[entity.position().y][entity.position().x] = mechanism;
+        else if (item != null)
+            elements[entity.position().y][entity.position().x] = item;
         else
             elements[entity.position().y][entity.position().x] = tiles[entity.position().y][entity.position().x];
         entities[entity.position().y + direction.y()][entity.position().x + direction.x()] = entity;
@@ -195,7 +277,7 @@ public class Dungeon {
 
     public void removeEntity(Entity entity) {
         entities[entity.position().y][entity.position().x] = null;
-        elements[entity.position().y][entity.position().x] = null;
+        elements[entity.position().y][entity.position().x] = tiles[entity.position().y][entity.position().x];
     }
 
     public void placeItem(Item item) {
@@ -205,12 +287,14 @@ public class Dungeon {
 
     public void removeItem(Item item) {
         items[item.position().y][item.position().x] = null;
-        elements[item.position().y][item.position().x] = null;
+        elements[item.position().y][item.position().x] = tiles[item.position().y][item.position().x];
     }
 
     public Tile[][] getTiles() { return tiles; }
 
     public Entity[][] getEntities() { return entities; }
+
+    public Enemy[][] getEnemies() { return enemies; }
 
     public Mechanism[][] getMechanisms() { return mechanisms; }
 

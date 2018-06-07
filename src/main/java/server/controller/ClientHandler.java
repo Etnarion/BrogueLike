@@ -2,10 +2,10 @@ package server.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import model.elements.Element;
+import model.elements.items.Item;
 import model.elements.mechanisms.Button;
-import model.elements.mechanisms.Mechanism;
+import model.elements.mechanisms.DescendingStairs;
 import protocol.*;
-import model.elements.entities.Entities;
 import model.elements.entities.Entity;
 import utils.JsonObjectMapper;
 import model.Dungeon;
@@ -18,38 +18,23 @@ import java.util.ArrayList;
 
 public class ClientHandler implements IClientHandler {
     private Hero hero;
+    PrintWriter writer;
 
     public ClientHandler(int id) {
-        hero = new Hero(new Point(4+id, 4), id);
+        hero = new Hero(new Point(2+id, 2), id);
     }
 
     @Override
-    public void handleClientConnection(InputStream is, OutputStream os) throws IOException {
+    public void handleClientConnection(InputStream is, OutputStream os) throws IOException, InterruptedException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        PrintWriter writer = new PrintWriter(new OutputStreamWriter(os));
+        writer = new PrintWriter(new OutputStreamWriter(os));
 
         String command;
         while (true) {
             command = reader.readLine();
             switch (command.toUpperCase()) {
                 case GameProtocol.HELLO :
-                    Dungeon.getDungeon().initHero(hero);
-                    writer.println(hero.getId());
-                    writer.flush();
-                    ArrayList<Hero> heroes = GameServer.getServer().getHeroes();
-                    for (Hero hero : heroes) {
-                        if (hero != this.hero) {
-                            InitHeroResponse heroResponse = new InitHeroResponse();
-                            heroResponse.setId(hero.getId());
-                            heroResponse.setPosition(hero.position());
-                            writer.println(HeroProtocol.INIT_HERO + '\n' + JsonObjectMapper.toJson(heroResponse));
-                            writer.flush();
-                        }
-                    }
-                    InitHeroResponse initResponse = new InitHeroResponse();
-                    initResponse.setId(hero.getId());
-                    initResponse.setPosition(hero.position());
-                    GameServer.getServer().notifyClients(this, HeroProtocol.INIT_HERO + "\n" + JsonObjectMapper.toJson(initResponse));
+                    initHeroes();
                     break;
                 case MoveProtocol.LEFT :
                     move(Direction.LEFT);
@@ -100,12 +85,19 @@ public class ClientHandler implements IClientHandler {
         hurtEntities(hurtResponse, direction);
     }
 
-    private void move(Direction direction) throws JsonProcessingException {
+    private void move(Direction direction) throws IOException, InterruptedException {
         MoveCommandResponse moveMessage;
         Element nextElement = Dungeon.getDungeon().getElement(new Point(hero.position().x + direction.x(), hero.position().y + direction.y()));
         if (nextElement instanceof Button) {
             ((Button) nextElement).activate();
             GameServer.getServer().notifyClients(GameProtocol.BUTTON + '\n' + ((Button) nextElement).getId());
+        }
+        if (nextElement instanceof Item) {
+            ((Item) nextElement).pickup(hero.position());
+            LootResponse lootResponse = new LootResponse();
+            lootResponse.setHeroId(hero.getId());
+            lootResponse.setItemId(((Item) nextElement).getId());
+            GameServer.getServer().notifyClients(GameProtocol.LOOT + '\n' + JsonObjectMapper.toJson(lootResponse));
         }
         if (Dungeon.getDungeon().moveEntity(hero, direction)) {
             moveMessage = new MoveCommandResponse();
@@ -113,6 +105,33 @@ public class ClientHandler implements IClientHandler {
             moveMessage.setDirection(direction);
             GameServer.getServer().notifyClients(MoveProtocol.MOVE_RESPONSE + "\n" + JsonObjectMapper.toJson(moveMessage));
         }
+        if (nextElement instanceof DescendingStairs) {
+            synchronized (Dungeon.getDungeon()) {
+                Dungeon.getDungeon().setStopping(true);
+                Dungeon.getDungeon().loadNewMap();
+                GameServer.getServer().notifyClients(GameProtocol.NEW_LEVEL);
+                initHeroes();
+                Dungeon.getDungeon().setStopping(false);
+            }
+        }
+    }
+
+    private void initHeroes() throws IOException {
+        Dungeon.getDungeon().initHero(hero);
+        writer.println(hero.getId());
+        writer.flush();
+        ArrayList<Hero> heroes = GameServer.getServer().getHeroes();
+        for (Hero hero : heroes) {
+            InitHeroResponse heroResponse = new InitHeroResponse();
+            heroResponse.setId(hero.getId());
+            heroResponse.setPosition(new Point(2+hero.getId(), 2));
+            writer.println(HeroProtocol.INIT_HERO + '\n' + JsonObjectMapper.toJson(heroResponse));
+            writer.flush();
+        }
+        InitHeroResponse initResponse = new InitHeroResponse();
+        initResponse.setId(hero.getId());
+        initResponse.setPosition(hero.position());
+        GameServer.getServer().notifyClients(this, HeroProtocol.INIT_HERO + "\n" + JsonObjectMapper.toJson(initResponse));
     }
 
     private void hurtEntities(HurtCommandResponse hurtMessage, Direction direction) {
@@ -140,6 +159,8 @@ public class ClientHandler implements IClientHandler {
                 } catch (InterruptedException ie) {
                 }
                 i++;
+                if (Dungeon.getDungeon().isStopping())
+                    return;
             }
         }).start();
     }

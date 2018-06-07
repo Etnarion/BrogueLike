@@ -26,7 +26,7 @@ public interface IClientHandler {
      * @param os output stream to send responses back to the client
      * @throws java.io.IOException
      */
-    public void handleClientConnection(InputStream is, OutputStream os) throws IOException;
+    public void handleClientConnection(InputStream is, OutputStream os) throws IOException, InterruptedException;
 
     public Hero getHero();
 }

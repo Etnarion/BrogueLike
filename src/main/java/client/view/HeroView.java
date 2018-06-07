@@ -8,7 +8,7 @@ import model.elements.entities.Hero;
 import java.io.IOException;
 
 public class HeroView {
-    private enum Positions {TOP, HEALTH, DAMAGE, RANGE, GOLD, BOTTOM}
+    private enum Positions {TOP, HEALTH, DAMAGE, RANGE, GOLD, WEAPON, BOTTOM}
     private final static int OFFSET_MENU = 2;
     private final static int OFFSET_LABELS = 10;
     private final static int OFFSET_RIGHT = 8;
@@ -80,12 +80,14 @@ public class HeroView {
         }
     }
 
-    public void showWeapon() {
-
-    }
-
-    public void showScore() {
-
+    public void showWeapon() throws IOException {
+        synchronized (DungeonView.getDungeonView()) {
+            terminal.setCursorPosition(Dungeon.DUNGEON_SIZE * 2 + OFFSET_MENU, OFFSET_MENU + Positions.WEAPON.ordinal());
+            ViewUtils.putString("║ ", TextColor.ANSI.WHITE, terminal);
+            ViewUtils.putFormattedString("Weapon : ", OFFSET_LABELS, new TextColor.RGB(255, 255, 255), terminal);
+            ViewUtils.putFormattedString(hero.getWeapon().getName(), 7, new TextColor.RGB(255, 255, 255), terminal);
+            ViewUtils.putFormattedString("║", OFFSET_RIGHT, TextColor.ANSI.WHITE, terminal);
+        }
     }
 
     public static HeroView getHeroView() {
@@ -99,6 +101,7 @@ public class HeroView {
         heroView.showDamage();
         heroView.showRange();
         heroView.showGold();
+        heroView.showWeapon();
         heroView.showBottomBorder();
     }
 }

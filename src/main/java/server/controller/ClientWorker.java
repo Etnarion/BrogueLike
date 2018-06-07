@@ -29,6 +29,8 @@ public class ClientWorker implements Runnable {
 
         } catch (IOException e) {
 
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
