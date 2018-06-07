@@ -177,13 +177,11 @@ public class Dungeon {
     }
 
     public Hero findClosestHero(Point position, int range) {
-        for (int i = 1; i <= range; i++) {
-            for (int j = position.x-i; j <= position.x+i; j++) {
-                for (int k = position.y-i; k <= position.y+i; k++) {
-                    if (k > 0 && j > 0 && k < DUNGEON_SIZE && j < DUNGEON_SIZE) {
-                        if (entities[k][j] instanceof Hero) {
-                            return (Hero)entities[k][j];
-                        }
+        for (int x = position.x-range; x <= position.x+range; x++) {
+            for (int y = position.y-range; y <= position.y+range; y++) {
+                if (x >= 0 && y >= 0 && x < DUNGEON_SIZE && y < DUNGEON_SIZE) {
+                    if (entities[y][x] instanceof Hero) {
+                        return (Hero)entities[y][x];
                     }
                 }
             }
