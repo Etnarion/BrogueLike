@@ -18,6 +18,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -114,23 +115,20 @@ public class GameServer {
                                     LOGGER.log(Level.INFO, "spider at " + e.position() + " detected a hero at " + closestHero.position());
 
                                     PathFinder pathFinder = new PathFinder(new DungeonGraph(Dungeon.getDungeon().getTiles()), e.position());
-                                    Stack<Integer> path = pathFinder.pathTo(closestHero.position().y * Dungeon.DUNGEON_SIZE + closestHero.position().x);
+                                    LinkedList<Integer> path = pathFinder.pathTo(closestHero.position().y * Dungeon.DUNGEON_SIZE + closestHero.position().x);
 
-                                    if (!path.empty()) {
-                                        path.pop();
-                                        if (!path.empty()) {
-                                            int nextMove = path.pop();
-                                            int y = nextMove % Dungeon.DUNGEON_SIZE;
-                                            int x = nextMove / Dungeon.DUNGEON_SIZE;
-                                            Point newPos = new Point(x, y);
-                                            LOGGER.log(Level.INFO, "spider's at " + e.position() + " next position: " + newPos);
-                                            Point prevPos = e.position();
-                                            e.move(newPos);
-                                            try {
-                                                moveEntity(e.getId(), Direction.getDirection(prevPos, newPos));
-                                            } catch (JsonProcessingException e1) {
-                                                e1.printStackTrace();
-                                            }
+                                    if (!path.isEmpty()) {
+                                        int nextMove = path.poll();
+                                        int x = nextMove % Dungeon.DUNGEON_SIZE;
+                                        int y = nextMove / Dungeon.DUNGEON_SIZE;
+                                        Point newPos = new Point(x, y);
+                                        LOGGER.log(Level.INFO, "spider's at " + e.position() + " next position: " + newPos);
+                                        Point prevPos = e.position();
+                                        e.move(newPos);
+                                        try {
+                                            moveEntity(e.getId(), Direction.getDirection(prevPos, newPos));
+                                        } catch (JsonProcessingException e1) {
+                                            e1.printStackTrace();
                                         }
 
                                     }

@@ -17,7 +17,7 @@ public class PathFinder {
 
     public PathFinder(DungeonGraph graph, Point position) {
         this.graph = graph;
-        source = position.x * (Dungeon.DUNGEON_SIZE) + position.y;
+        source = position.y * (Dungeon.DUNGEON_SIZE) + position.x;
         edgeTo = new int[graph.V()];
         distTo = new int[graph.V()];
         marked = new boolean[graph.V()];
@@ -57,12 +57,12 @@ public class PathFinder {
      * @return the stack containing the path from the source (top of the stack, exclusive)
      * to v(bottom of the stack, inclusive). If no path exists to the destination(v) vertex, returns null.
      */
-    public Stack<Integer> pathTo(int v) {
+    public LinkedList<Integer> pathTo(int v) {
         if (!hasPathTo(v)) return null;
-        Stack<Integer> path = new Stack();
+        LinkedList<Integer> path = new LinkedList<>();
         int curr = v;
         while (distTo[curr] != 0) {
-            path.push(curr);
+            path.addFirst(curr);
             curr = edgeTo[curr];
         }
         return path;
