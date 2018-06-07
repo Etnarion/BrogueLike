@@ -21,7 +21,6 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.Stack;
 
 public class Dungeon {
@@ -34,13 +33,14 @@ public class Dungeon {
     private Element[][] elements;
     private Hero hero;
     private Stack<String> dungeons;
-    private boolean stopping = false;
+    private int currentLevel;
 
     static private Dungeon dungeon = new Dungeon();
 
     final public static int DUNGEON_SIZE = 24;
 
     private Dungeon() {
+        currentLevel = 1;
         dungeons = new Stack<>();
         dungeons.push("2.txt");
         dungeons.push("1.txt");
@@ -64,6 +64,13 @@ public class Dungeon {
     }
 
     public void loadNewMap() {
+        currentLevel++;
+        for (Entity[] ents : entities) {
+            for (Entity he : ents) {
+                if (he instanceof Hero)
+                    he.setPosition(new Point(2+he.getId(), 2));
+            }
+        }
         for (int i = 0; i < DUNGEON_SIZE; i++) {
             for (int j = 0; j < DUNGEON_SIZE; j++) {
                 tiles[i][j] = null;
@@ -75,6 +82,10 @@ public class Dungeon {
             }
         }
         generateDungeon();
+    }
+
+    public int getCurrentLevel() {
+        return currentLevel;
     }
 
     public void generateDungeon() {
@@ -180,14 +191,6 @@ public class Dungeon {
         return null;
     }
 
-    public boolean isStopping() {
-        return stopping;
-    }
-
-    public void setStopping(boolean stopping) {
-        this.stopping = stopping;
-    }
-
     public Tile getTile(Point position) {
         return tiles[position.y][position.x];
     }
@@ -220,6 +223,10 @@ public class Dungeon {
             }
         }
         return null;
+    }
+
+    public Item getItem(Point position) {
+        return items[position.y][position.x];
     }
 
     public Element getElement(Point position) {

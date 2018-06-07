@@ -104,25 +104,24 @@ public class ClientController implements Runnable {
                     break;
                 case GameProtocol.LOOT :
                     LootResponse lootResponse = JsonObjectMapper.parseJson(in.readLine(), LootResponse.class);
-                    Item item = Dungeon.getDungeon().getItem(lootResponse.getItemId());
                     Hero lootHero = (Hero)Dungeon.getDungeon().getEntity(lootResponse.getHeroId());
+                    Item item = Dungeon.getDungeon().getItem(lootHero.position());
                     if (item != null) {
-                        item.pickup(lootHero.position());
                         Weapon oldWeapon = lootHero.getWeapon();
+                        item.pickup(lootHero.position());
                         DungeonView.getDungeonView().displayElement(oldWeapon.position());
                         HeroView.getHeroView().showStatus();
                     }
                     break;
                 case GameProtocol.NEW_LEVEL :
                     synchronized (Dungeon.getDungeon()) {
-                        Dungeon.getDungeon().setStopping(true);
                         Dungeon.getDungeon().loadNewMap();
                         DungeonView.getDungeonView().showMap();
                         Hero he = Dungeon.getDungeon().getHero();
                         he.setPosition(new Point(2+he.getId(), 2));
                         Dungeon.getDungeon().placeEntity(he);
                         DungeonView.getDungeonView().displayEntity(he);
-                        Dungeon.getDungeon().setStopping(false);
+                        HeroView.getHeroView().showStatus();
                     }
                     break;
                 default:

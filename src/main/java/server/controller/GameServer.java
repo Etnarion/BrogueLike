@@ -101,36 +101,37 @@ public class GameServer {
             for (Enemy e : es) {
                 if (e != null) {
                     new Thread(() -> {
-                        while (e.isAlive()) {
-                            Hero closestHero = Dungeon.getDungeon().findClosestHero(e.position(), e.getVision());
-                            if (closestHero != null) {
-                                PathFinder pathFinder = new PathFinder(new DungeonGraph(Dungeon.getDungeon().getTiles()), e.position());
-                                Stack<Integer> path = pathFinder.pathTo(closestHero.position().y * Dungeon.DUNGEON_SIZE + closestHero.position().x);
+                        int currentLevel = Dungeon.getDungeon().getCurrentLevel();
+                        while (currentLevel == Dungeon.getDungeon().getCurrentLevel() && e.isAlive()) {
+                            synchronized (this) {
+                                Hero closestHero = Dungeon.getDungeon().findClosestHero(e.position(), e.getVision());
+                                if (closestHero != null) {
+                                    PathFinder pathFinder = new PathFinder(new DungeonGraph(Dungeon.getDungeon().getTiles()), e.position());
+                                    Stack<Integer> path = pathFinder.pathTo(closestHero.position().y * Dungeon.DUNGEON_SIZE + closestHero.position().x);
 
-                                if (!path.empty()) {
-                                    path.pop();
                                     if (!path.empty()) {
-                                        int nextMove = path.pop();
-                                        int y = nextMove % Dungeon.DUNGEON_SIZE;
-                                        int x = nextMove / Dungeon.DUNGEON_SIZE;
-                                        Point newPos = new Point(x, y);
-                                        Point prevPos = e.position();
-                                        e.move(newPos);
-                                        try {
-                                            moveEntity(e.getId(), Direction.getDirection(prevPos, newPos));
-                                        } catch (JsonProcessingException e1) {
-                                            e1.printStackTrace();
+                                        path.pop();
+                                        if (!path.empty()) {
+                                            int nextMove = path.pop();
+                                            int y = nextMove % Dungeon.DUNGEON_SIZE;
+                                            int x = nextMove / Dungeon.DUNGEON_SIZE;
+                                            Point newPos = new Point(x, y);
+                                            Point prevPos = e.position();
+                                            e.move(newPos);
+                                            try {
+                                                moveEntity(e.getId(), Direction.getDirection(prevPos, newPos));
+                                            } catch (JsonProcessingException e1) {
+                                                e1.printStackTrace();
+                                            }
                                         }
-                                    }
 
-                                }
-                                try {
-                                    Thread.sleep(500);
-                                } catch (InterruptedException ie) {
+                                    }
                                 }
                             }
-                            if (Dungeon.getDungeon().isStopping())
-                                return;
+                            try {
+                                Thread.sleep(500);
+                            } catch (InterruptedException ie) {
+                            }
                         }
                     }).start();
                 }

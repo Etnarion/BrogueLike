@@ -4,7 +4,10 @@ import java.io.IOException;
 
 import model.Dungeon;
 import model.elements.Element;
+import model.elements.items.Item;
 import model.elements.mechanisms.Door;
+import model.elements.mechanisms.Mechanism;
+import model.elements.tiles.Tile;
 import model.elements.tiles.Wall;
 import utils.Direction;
 import com.googlecode.lanterna.input.KeyStroke;
@@ -17,8 +20,8 @@ import com.googlecode.lanterna.terminal.TerminalResizeListener;
 public class DungeonView implements TerminalResizeListener {
     private Terminal terminal;
     private Element[][] map;
-    private Element[][] tileMap;
-
+    private Tile[][] tileMap;
+    private Mechanism[][] mechMap;
 
     private static DungeonView dungeonView;
 
@@ -36,6 +39,7 @@ public class DungeonView implements TerminalResizeListener {
         terminal.addResizeListener(this);
         map = Dungeon.getDungeon().getElements();
         tileMap = Dungeon.getDungeon().getTiles();
+        mechMap = Dungeon.getDungeon().getMechanisms();
     }
 
     public void showMap() throws IOException  {
@@ -45,7 +49,10 @@ public class DungeonView implements TerminalResizeListener {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 terminal.setForegroundColor(map[i][j].fontColor);
-                terminal.setBackgroundColor(tileMap[i][j].color);
+                if (mechMap[i][j] != null)
+                    terminal.setBackgroundColor(mechMap[i][j].color);
+                else
+                    terminal.setBackgroundColor(tileMap[i][j].color);
                 terminal.putCharacter(map[i][j].symbol);
                 if (map[i][j] instanceof Wall || map[i][j] instanceof Door) {
                     terminal.putCharacter(map[i][j].symbol);
@@ -96,7 +103,8 @@ public class DungeonView implements TerminalResizeListener {
                 Point position = entity.position();
                 boolean wallFound = false;
                 int i = 1;
-                while (i <= range && !wallFound) {
+                int currentLevel = Dungeon.getDungeon().getCurrentLevel();
+                while (currentLevel == Dungeon.getDungeon().getCurrentLevel() && i <= range && !wallFound) {
                     Point curPos = new Point(position.x + i * direction.x(), position.y + i * direction.y());
                     if (curPos.x < Dungeon.DUNGEON_SIZE && curPos.x >= 0 && curPos.y < Dungeon.DUNGEON_SIZE && curPos.y >= 0) {
                         Element element = map[curPos.y][curPos.x];
@@ -127,8 +135,6 @@ public class DungeonView implements TerminalResizeListener {
                         wallFound = !Dungeon.getDungeon().getElement(curPos).isWalkable();
                         i++;
                     }
-                    if (Dungeon.getDungeon().isStopping())
-                        return;
                 }
             } catch (IOException e) {
                 e.printStackTrace();
