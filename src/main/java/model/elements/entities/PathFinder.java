@@ -54,7 +54,7 @@ public class PathFinder {
     /**
      * Finds the shortest path from the source edge to the v vertex
      * @param v the edge we want to find the shortest path to
-     * @return the stack containing the path from the source path(top of the stack, exclusive)
+     * @return the stack containing the path from the source (top of the stack, exclusive)
      * to v(bottom of the stack, inclusive). If no path exists to the destination(v) vertex, returns null.
      */
     public Stack<Integer> pathTo(int v) {

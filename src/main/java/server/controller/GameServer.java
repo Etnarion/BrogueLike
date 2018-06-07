@@ -21,6 +21,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GameServer {
     ServerSocket serverSocket;
@@ -30,6 +32,8 @@ public class GameServer {
     private static GameServer server = new GameServer();
     private boolean running;
     private List<ClientWorker> clientWorkers = new CopyOnWriteArrayList<>();
+
+    private final static Logger LOGGER = Logger.getLogger(GameServer.class.getName());
 
     private GameServer(int port) {
         this.port = port;
@@ -106,6 +110,9 @@ public class GameServer {
                             synchronized (this) {
                                 Hero closestHero = Dungeon.getDungeon().findClosestHero(e.position(), e.getVision());
                                 if (closestHero != null) {
+
+                                    LOGGER.log(Level.INFO, "spider at " + e.position() + " detected a hero at " + closestHero.position());
+
                                     PathFinder pathFinder = new PathFinder(new DungeonGraph(Dungeon.getDungeon().getTiles()), e.position());
                                     Stack<Integer> path = pathFinder.pathTo(closestHero.position().y * Dungeon.DUNGEON_SIZE + closestHero.position().x);
 
@@ -116,6 +123,7 @@ public class GameServer {
                                             int y = nextMove % Dungeon.DUNGEON_SIZE;
                                             int x = nextMove / Dungeon.DUNGEON_SIZE;
                                             Point newPos = new Point(x, y);
+                                            LOGGER.log(Level.INFO, "spider's at " + e.position() + " next position: " + newPos);
                                             Point prevPos = e.position();
                                             e.move(newPos);
                                             try {

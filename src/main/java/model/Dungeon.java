@@ -37,13 +37,14 @@ public class Dungeon {
 
     static private Dungeon dungeon = new Dungeon();
 
-    final public static int DUNGEON_SIZE = 24;
+    final public static int DUNGEON_SIZE = 8;
 
     private Dungeon() {
         currentLevel = 1;
         dungeons = new Stack<>();
-        dungeons.push("2.txt");
-        dungeons.push("1.txt");
+//        dungeons.push("2.txt");
+//        dungeons.push("1.txt");
+        dungeons.push("tinymap.txt");
         tiles = new Tile[DUNGEON_SIZE][DUNGEON_SIZE];
         entities = new Entity[DUNGEON_SIZE][DUNGEON_SIZE];
         enemies = new Enemy[DUNGEON_SIZE][DUNGEON_SIZE];
