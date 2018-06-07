@@ -7,11 +7,19 @@ import java.util.LinkedList;
 
 public class DungeonGraph {
     public class Edge {
-        public int v1, v2;
+        private int v1, v2;
 
         public Edge(int v1, int v2) {
             this.v1 = v1;
             this.v2 = v2;
+        }
+
+        public int either() {
+            return v1;
+        }
+
+        public int other(int v) {
+            return (v == v1) ? v2 : v1;
         }
     }
 
@@ -37,16 +45,16 @@ public class DungeonGraph {
         for (int i = 0; i < map.length; i++) {
             for (int j = 0; j < map[i].length; j++) {
                 if (map[i][j].isWalkable()) {
-                    if (i-1 > 0 && map[i-1][j].isWalkable()) {
+                    if (i-1 >= 0 && map[i-1][j].isWalkable()) {
                         addEdge(i*map.length+j, (i-1)*map.length+j);
                     }
                     if (i+1 < map.length && map[i+1][j].isWalkable()) {
                         addEdge(i*map.length+j, (i+1)*map.length+j);
                     }
-                    if (j-1 > 0 && map[i][j-1].isWalkable()) {
+                    if (j-1 >= 0 && map[i][j-1].isWalkable()) {
                         addEdge(i*map.length+j, i*map.length+j-1);
                     }
-                    if (j-1 < map.length && map[i][j+1].isWalkable()) {
+                    if (j+1 < map.length && map[i][j+1].isWalkable()) {
                         addEdge(i*map.length+j, i*map.length+j+1);
                     }
                 }
