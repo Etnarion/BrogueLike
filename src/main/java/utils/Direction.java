@@ -31,12 +31,12 @@ public enum Direction {
         int y = newPos.y - pos.y;
 
         if (y == -1)
-            return LEFT;
-        else if (y == 1)
-            return RIGHT;
-        else if (x == -1)
             return UP;
-        else
+        else if (y == 1)
             return DOWN;
+        else if (x == -1)
+            return LEFT;
+        else
+            return RIGHT;
     }
 }
