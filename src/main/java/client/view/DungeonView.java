@@ -67,7 +67,7 @@ public class DungeonView implements TerminalResizeListener {
     @Override
     public void onResized(Terminal terminal, TerminalSize terminalSize) {
         try {
-            if (map != null) {
+            if (map != null && Dungeon.getDungeon().isInitialized()) {
                 showMap();
             }
         } catch (IOException ignored) {

@@ -20,9 +20,8 @@ public abstract class Weapon extends Item {
         name = getClass().getSimpleName() + "+" + damage;
     }
 
-    public void pickup(Point position) {
-        super.pickup(position);
-        Hero hero = (Hero)Dungeon.getDungeon().getEntity(position);
+    public void pickup(Hero hero) {
+        super.pickup(hero);
         Weapon oldWeapon = hero.getWeapon();
         hero.setWeapon(this);
         oldWeapon.drop();

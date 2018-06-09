@@ -15,9 +15,8 @@ public class Gold extends Consumable {
         this.amount = amount;
     }
 
-    public void pickup(Point position) {
-        super.pickup(position);
-        Hero hero = (Hero)Dungeon.getDungeon().getEntity(position);
+    public void pickup(Hero hero) {
+        super.pickup(hero);
         hero.setGold(hero.getGold() + amount);
         Dungeon.getDungeon().removeItem(this);
     }

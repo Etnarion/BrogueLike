@@ -1,5 +1,6 @@
 package server.controller;
 
+import client.Client;
 import client.view.DungeonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import model.Dungeon;
@@ -43,17 +44,20 @@ public class GameServer {
         serverSocket.bind(new InetSocketAddress(port));
 
         Thread serverThread = new Thread(() -> {
-            while (true) {
+            while (nbClients < MAX_CONNEXIONS) {
                 try {
                     Socket clientSocket = serverSocket.accept();
                     nbClients++;
                     ClientWorker clientWorker = new ClientWorker(clientSocket, getClientHandler(), GameServer.this);
                     clientWorkers.add(clientWorker);
-                    Thread clientThread = new Thread(clientWorker);
-                    clientThread.start();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
+            }
+
+            for (ClientWorker clientWorker : clientWorkers) {
+                Thread clientThread = new Thread(clientWorker);
+                clientThread.start();
             }
 
         });

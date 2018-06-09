@@ -9,18 +9,18 @@ public class ViewUtils {
 
     public static final TextColor DEFAULT_COLOR = new TextColor.RGB(48, 48, 48);
 
-    public static void putString(String string, TextColor textColor, Terminal terminal) throws IOException {
+    public static void putString(String string, TextColor textColor, TextColor backgroundColor, Terminal terminal) throws IOException {
         for (char c : string.toCharArray()) {
-            terminal.setBackgroundColor(TextColor.ANSI.BLACK);
+            terminal.setBackgroundColor(backgroundColor);
             terminal.setForegroundColor(textColor);
             terminal.putCharacter(c);
             terminal.flush();
         }
     }
 
-    public static void putFormattedString(String string, int size, TextColor textColor, Terminal terminal) throws IOException {
+    public static void putFormattedString(String string, int size, TextColor textColor, TextColor backgroundColor, Terminal terminal) throws IOException {
         int j = 0;
-        terminal.setBackgroundColor(TextColor.ANSI.BLACK);
+        terminal.setBackgroundColor(backgroundColor);
         for (int i = 0; i < size; i++) {
             if (i < size - string.length()) {
                 terminal.setForegroundColor(textColor);

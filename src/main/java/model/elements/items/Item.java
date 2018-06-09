@@ -2,11 +2,12 @@ package model.elements.items;
 
 import model.Dungeon;
 import model.elements.Element;
+import model.elements.entities.Hero;
 
 import java.awt.*;
 
 public abstract class Item extends Element {
-    private static int nbItems = 0;
+    private static int nbItems = 5000;
 
     private int id;
 
@@ -16,7 +17,7 @@ public abstract class Item extends Element {
         walkable = true;
     }
 
-    public void pickup(Point position) {
+    public void pickup(Hero hero) {
         Dungeon.getDungeon().removeItem(this);
     }
 

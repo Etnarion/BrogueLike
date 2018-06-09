@@ -21,10 +21,11 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Stack;
 
 public class Dungeon {
-    private static int idEntity = 50;
+    private static int idEntity = 100;
     private Tile[][] tiles;
     private Entity[][] entities;
     private Enemy[][] enemies;
@@ -32,8 +33,10 @@ public class Dungeon {
     private Mechanism[][] mechanisms;
     private Element[][] elements;
     private Hero hero;
+    private LinkedList<Hero> heroes;
     private Stack<String> dungeons;
     private int currentLevel;
+    private boolean initialized = false;
 
     static private Dungeon dungeon = new Dungeon();
 
@@ -44,6 +47,7 @@ public class Dungeon {
         dungeons = new Stack<>();
         dungeons.push("2.txt");
         dungeons.push("1.txt");
+        heroes = new LinkedList<>();
         tiles = new Tile[DUNGEON_SIZE][DUNGEON_SIZE];
         entities = new Entity[DUNGEON_SIZE][DUNGEON_SIZE];
         enemies = new Enemy[DUNGEON_SIZE][DUNGEON_SIZE];
@@ -53,14 +57,31 @@ public class Dungeon {
         generateDungeon();
     }
 
+    public boolean isInitialized() {
+        return initialized;
+    }
+
     public void initHero(Hero hero) throws IOException {
+        heroes.add(hero);
         placeEntity(hero);
     }
 
     public void initHero(int id) throws IOException {
         hero = new Hero(new Point(2+id, 2), id);
+        heroes.add(hero);
         placeEntity(hero);
         DungeonView.getDungeonView().displayEntity(hero);
+    }
+
+    public void initHero(Point position, int id) throws IOException {
+        hero = new Hero(position, id);
+        heroes.add(hero);
+        placeEntity(hero);
+        DungeonView.getDungeonView().displayEntity(hero);
+    }
+
+    public LinkedList<Hero> getHeroes() {
+        return heroes;
     }
 
     public void loadNewMap() {
@@ -244,6 +265,14 @@ public class Dungeon {
 
     public Hero getHero() {
         return hero;
+    }
+
+    public Hero getHero(int id) {
+        for (Hero hero : heroes) {
+            if (hero.getId() == id)
+                return hero;
+        }
+        return null;
     }
 
     public boolean moveEntity(Entity entity, Point newPos) {
