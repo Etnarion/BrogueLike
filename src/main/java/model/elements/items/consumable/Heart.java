@@ -16,9 +16,8 @@ public class Heart extends Consumable {
         symbol = '@';
     }
 
-    public void pickup(Point position) {
-        super.pickup(position);
-        Hero hero = (Hero)Dungeon.getDungeon().getEntity(position);
+    public void pickup(Hero hero) {
+        super.pickup(hero);
         hero.setHealth(hero.getHealth() + amount);
     }
 }

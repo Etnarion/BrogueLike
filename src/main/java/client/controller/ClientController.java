@@ -2,12 +2,11 @@ package client.controller;
 
 import client.view.HeroView;
 import com.fasterxml.jackson.core.JsonParseException;
+import jdk.nashorn.internal.codegen.DumpBytecode;
 import model.Dungeon;
 import model.elements.entities.Entity;
 import model.elements.entities.Hero;
-import model.elements.entities.Spider;
 import model.elements.items.Item;
-import model.elements.items.weapons.Weapon;
 import model.elements.mechanisms.Button;
 import model.elements.mechanisms.Mechanism;
 import utils.JsonObjectMapper;
@@ -27,7 +26,7 @@ public class ClientController implements Runnable {
         this.in = in;
         this.out = out;
         Dungeon.getDungeon();
-        DungeonView.getDungeonView();
+        DungeonView.getDungeonView().showMap();
         HeroView.getHeroView().showStatus();
     }
 
@@ -89,9 +88,9 @@ public class ClientController implements Runnable {
                     break;
                 case HeroProtocol.INIT_HERO :
                     InitHeroResponse initResponse = JsonObjectMapper.parseJson(in.readLine(), InitHeroResponse.class);
-                    Hero hero = new Hero(initResponse.getPosition(), initResponse.getId());
-                    Dungeon.getDungeon().placeEntity(hero);
-                    DungeonView.getDungeonView().displayEntity(hero);
+                    if (initResponse.getId() != Dungeon.getDungeon().getHero().getId()) {
+                        Dungeon.getDungeon().initHero(initResponse.getPosition(), initResponse.getId());
+                    }
                     break;
                 case GameProtocol.BUTTON :
                     Button button = (Button)Dungeon.getDungeon().getMechanism(Integer.valueOf(in.readLine()));
@@ -103,24 +102,27 @@ public class ClientController implements Runnable {
                     }
                     break;
                 case GameProtocol.LOOT :
-                    LootResponse lootResponse = JsonObjectMapper.parseJson(in.readLine(), LootResponse.class);
-                    Hero lootHero = (Hero)Dungeon.getDungeon().getEntity(lootResponse.getHeroId());
-                    Item item = Dungeon.getDungeon().getItem(lootHero.position());
-                    if (item != null) {
-                        Weapon oldWeapon = lootHero.getWeapon();
-                        item.pickup(lootHero.position());
-                        DungeonView.getDungeonView().displayElement(oldWeapon.position());
-                        HeroView.getHeroView().showStatus();
+                    synchronized (this) {
+                        LootResponse lootResponse = JsonObjectMapper.parseJson(in.readLine(), LootResponse.class);
+                        Hero lootHero = Dungeon.getDungeon().getHero(lootResponse.getHeroId());
+                        Item item = Dungeon.getDungeon().getItem(lootResponse.getItemId());
+                        if (item != null) {
+                            item.pickup(lootHero);
+                            HeroView.getHeroView().showStatus();
+                        }
                     }
                     break;
                 case GameProtocol.NEW_LEVEL :
                     synchronized (Dungeon.getDungeon()) {
-                        Dungeon.getDungeon().loadNewMap();
-                        DungeonView.getDungeonView().showMap();
-                        Hero he = Dungeon.getDungeon().getHero();
-                        he.setPosition(new Point(2+he.getId(), 2));
-                        Dungeon.getDungeon().placeEntity(he);
-                        DungeonView.getDungeonView().displayEntity(he);
+                        Dungeon dungeon = Dungeon.getDungeon();
+                        dungeon.loadNewMap();
+                        DungeonView dungeonView = DungeonView.getDungeonView();
+                        dungeonView.showMap();
+                        for (Hero hero : Dungeon.getDungeon().getHeroes()) {
+                            hero.setPosition(new Point(2+hero.getId(), 2));
+                            dungeon.placeEntity(hero);
+                            dungeonView.displayEntity(hero);
+                        }
                         HeroView.getHeroView().showStatus();
                     }
                     break;

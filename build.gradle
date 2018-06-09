@@ -22,5 +22,16 @@ dependencies {
 
 }
 
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'Main',
+                'Class-Path': configurations.compile.collect { 'lib/' + it.getName() }.join(' ')
+        )
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
 
 

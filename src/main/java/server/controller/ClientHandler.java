@@ -96,11 +96,12 @@ public class ClientHandler implements IClientHandler {
             moveMessage = new MoveCommandResponse();
             moveMessage.setId(hero.getId());
             moveMessage.setDirection(direction);
-            GameServer.getServer().notifyClients(MoveProtocol.MOVE_RESPONSE + "\n" + JsonObjectMapper.toJson(moveMessage));
+            GameServer.getServer().notifyClients(MoveProtocol.MOVE_RESPONSE + '\n' + JsonObjectMapper.toJson(moveMessage));
         }
         if (nextElement instanceof Item) {
-            ((Item) nextElement).pickup(hero.position());
+            ((Item) nextElement).pickup(hero);
             LootResponse lootResponse = new LootResponse();
+            lootResponse.setItemId(((Item) nextElement).getId());
             lootResponse.setHeroId(hero.getId());
             GameServer.getServer().notifyClients(GameProtocol.LOOT + '\n' + JsonObjectMapper.toJson(lootResponse));
         }
