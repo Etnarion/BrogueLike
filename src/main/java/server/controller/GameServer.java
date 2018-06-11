@@ -112,7 +112,7 @@ public class GameServer {
                     new Thread(() -> {
                         int currentLevel = Dungeon.getDungeon().getCurrentLevel();
                         while (currentLevel == Dungeon.getDungeon().getCurrentLevel() && e.isAlive()) {
-                            synchronized (this) {
+                            synchronized (Dungeon.getDungeon()) {
                                 Hero closestHero = Dungeon.getDungeon().findClosestHero(e.position(), e.getVision());
                                 if (closestHero != null) {
 

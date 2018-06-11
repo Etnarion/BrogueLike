@@ -62,7 +62,9 @@ public class PathFinder {
         LinkedList<Integer> path = new LinkedList<>();
         int curr = v;
         while (distTo[curr] != 0) {
-            path.addFirst(curr);
+            if(curr != v) {
+                path.addFirst(curr);
+            }
             curr = edgeTo[curr];
         }
         return path;
