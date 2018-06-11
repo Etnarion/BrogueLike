@@ -17,10 +17,14 @@ import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientController implements Runnable {
     BufferedReader in;
     PrintWriter out;
+
+    private final static Logger LOGGER = Logger.getLogger(ClientController.class.getName());
 
     public ClientController(BufferedReader in, PrintWriter out) throws IOException {
         this.in = in;
@@ -49,6 +53,7 @@ public class ClientController implements Runnable {
 
                         Dungeon dungeon = Dungeon.getDungeon();
                         Entity entity = dungeon.getEntity(response.getId());
+                        LOGGER.log(Level.INFO, "Entity of id " + entity.getId() + " attacks to it's " + response.getDirection());
                         DungeonView.getDungeonView().attack(entity, response.getDirection(), response.getRange());
                     }
                     break;
@@ -63,7 +68,9 @@ public class ClientController implements Runnable {
                             break;
                         }
                         if (hurtResponse.getEntityId() != -1) {
-                            Dungeon.getDungeon().getEntity(hurtResponse.getEntityId()).hurt(hurtResponse.getDamage());
+                            Entity entity = Dungeon.getDungeon().getEntity(hurtResponse.getEntityId());
+                            entity.hurt(hurtResponse.getDamage());
+                            LOGGER.log(Level.INFO, "Entity of id " + entity.getId() + " got hurt");
                             if (hurtResponse.getEntityId() == Dungeon.getDungeon().getHero().getId()) {
                                 HeroView.getHeroView().showHealth();
                             }
@@ -96,6 +103,7 @@ public class ClientController implements Runnable {
                     Button button = (Button)Dungeon.getDungeon().getMechanism(Integer.valueOf(in.readLine()));
                     if (button != null) {
                         button.activate();
+                        LOGGER.log(Level.INFO, "Button of id " + button.getId() + " has been activated");
                         for (Mechanism mechanism : button.getLinkedMechanisms()) {
                             DungeonView.getDungeonView().displayElement(mechanism.position());
                         }
@@ -108,6 +116,7 @@ public class ClientController implements Runnable {
                         Item item = Dungeon.getDungeon().getItem(lootResponse.getItemId());
                         if (item != null) {
                             item.pickup(lootHero);
+                            LOGGER.log(Level.INFO, "Hero of id " + lootHero.getId() + " at " + lootHero.position() + " loots the item " + item.getId() + " at " + item.position());
                             HeroView.getHeroView().showStatus();
                         }
                     }
