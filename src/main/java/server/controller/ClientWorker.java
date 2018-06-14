@@ -41,4 +41,8 @@ public class ClientWorker implements Runnable {
     public OutputStream getOs() {
         return os;
     }
+
+    public InputStream getIs() {
+        return is;
+    }
 }

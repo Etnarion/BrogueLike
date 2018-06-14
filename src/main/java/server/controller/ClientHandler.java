@@ -15,10 +15,14 @@ import utils.Direction;
 import java.awt.*;
 import java.io.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ClientHandler implements IClientHandler {
     private Hero hero;
     PrintWriter writer;
+
+    private final static Logger LOGGER = Logger.getLogger(ClientHandler.class.getName());
 
     public ClientHandler(int id) {
         hero = new Hero(new Point(2+id, 2), id);
@@ -142,7 +146,9 @@ public class ClientHandler implements IClientHandler {
                 if (position.x < Dungeon.DUNGEON_SIZE && position.x >= 0 && position.y < Dungeon.DUNGEON_SIZE && position.y >= 0) {
                     Entity entityToHurt = Dungeon.getDungeon().getEntity(position);
                     if (entityToHurt != null) {
+                        LOGGER.log(Level.INFO, "Hero " + hero.getId() + " hurts entity " + entityToHurt.getId());
                         entityToHurt.hurt(hero.getDamage());
+                        LOGGER.log(Level.INFO, "Entity's " + entityToHurt.getId() + " hp: " + entityToHurt.getHealth());
                         hurtMessage.setEntityId(entityToHurt.getId());
                     } else
                         hurtMessage.setEntityId(-1);

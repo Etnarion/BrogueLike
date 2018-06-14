@@ -6,6 +6,8 @@ import model.Dungeon;
 import model.elements.entities.Hero;
 
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class HeroView {
     private enum Positions {TOP, HEALTH, DAMAGE, RANGE, GOLD, WEAPON, BOTTOM}
@@ -16,6 +18,8 @@ public class HeroView {
     Hero hero;
 
     private static HeroView heroView = new HeroView();
+
+    private final static Logger LOGGER = Logger.getLogger(HeroView.class.getName());
 
     HeroView() {
         terminal = DungeonView.getDungeonView().getTerminal();
@@ -38,6 +42,7 @@ public class HeroView {
             ViewUtils.putString("║ ", TextColor.ANSI.WHITE, TextColor.ANSI.BLACK, terminal);
             ViewUtils.putFormattedString("Health : ", OFFSET_LABELS, new TextColor.RGB(255, 255, 255), TextColor.ANSI.BLACK, terminal);
             String currentHealth = String.valueOf(hero.getHealth());
+            LOGGER.log(Level.INFO, "Updating hero's " + hero.getId() + " health: " + hero.getHealth());
             String maxHealth = String.valueOf(hero.getMaxHealth());
             TextColor healthColor = new TextColor.RGB(188, 1, 1);
             ViewUtils.putFormattedString(currentHealth, 3, healthColor, TextColor.ANSI.BLACK, terminal);

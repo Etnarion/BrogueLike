@@ -1,7 +1,5 @@
 package server.controller;
 
-import client.Client;
-import client.view.DungeonView;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import model.Dungeon;
 import model.DungeonGraph;
@@ -21,7 +19,6 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,7 +66,7 @@ public class GameServer {
         serverThread.start();
     }
 
-    private IClientHandler getClientHandler() {
+    private synchronized IClientHandler getClientHandler() {
         return new ClientHandler(nbClients);
     }
 

@@ -23,8 +23,8 @@ public abstract class Weapon extends Item {
     public void pickup(Hero hero) {
         super.pickup(hero);
         Weapon oldWeapon = hero.getWeapon();
-        hero.setWeapon(this);
         oldWeapon.drop();
+        hero.setWeapon(this);
     }
 
     private void drop() {

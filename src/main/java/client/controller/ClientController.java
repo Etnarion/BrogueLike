@@ -2,7 +2,6 @@ package client.controller;
 
 import client.view.HeroView;
 import com.fasterxml.jackson.core.JsonParseException;
-import jdk.nashorn.internal.codegen.DumpBytecode;
 import model.Dungeon;
 import model.elements.entities.Entity;
 import model.elements.entities.Hero;
@@ -71,6 +70,7 @@ public class ClientController implements Runnable {
                             Entity entity = Dungeon.getDungeon().getEntity(hurtResponse.getEntityId());
                             entity.hurt(hurtResponse.getDamage());
                             LOGGER.log(Level.INFO, "Entity of id " + entity.getId() + " got hurt");
+                            LOGGER.log(Level.INFO, "Entity's " + entity.getId() + " hp is " + entity.getHealth());
                             if (hurtResponse.getEntityId() == Dungeon.getDungeon().getHero().getId()) {
                                 HeroView.getHeroView().showHealth();
                             }
@@ -89,6 +89,7 @@ public class ClientController implements Runnable {
                         Dungeon dungeon = Dungeon.getDungeon();
                         Entity entity = dungeon.getEntity(response.getId());
                         Point prevPos = entity.position();
+                        LOGGER.log(Level.INFO, "Entity of id " + entity.getId() + " moves to " + response.getDirection());
                         dungeon.moveEntity(entity, response.getDirection());
                         DungeonView.getDungeonView().move(entity, prevPos);
                     }
@@ -97,6 +98,7 @@ public class ClientController implements Runnable {
                     InitHeroResponse initResponse = JsonObjectMapper.parseJson(in.readLine(), InitHeroResponse.class);
                     if (initResponse.getId() != Dungeon.getDungeon().getHero().getId()) {
                         Dungeon.getDungeon().initHero(initResponse.getPosition(), initResponse.getId());
+                        LOGGER.log(Level.INFO, "Init hero, it's id is: " + Dungeon.getDungeon().getHero().getId());
                     }
                     break;
                 case GameProtocol.BUTTON :
